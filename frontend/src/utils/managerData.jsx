@@ -1,0 +1,105 @@
+// utils/managerData.js
+export const mockTeam = [
+  {
+    id: 1,
+    name: "Alice Johnson",
+    email: "alice.j@company.com",
+    department: "Engineering",
+    position: "Frontend Developer",
+    status: "active",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alice",
+    joinDate: "2023-05-10",
+  },
+  {
+    id: 2,
+    name: "Bob Smith",
+    email: "bob.s@company.com",
+    department: "Engineering",
+    position: "Backend Developer",
+    status: "active",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob",
+    joinDate: "2023-07-15",
+  },
+  {
+    id: 3,
+    name: "Carol Davis",
+    email: "carol.d@company.com",
+    department: "Marketing",
+    position: "Marketing Specialist",
+    status: "inactive",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Carol",
+    joinDate: "2023-03-22",
+  },
+  {
+    id: 4,
+    name: "David Wilson",
+    email: "david.w@company.com",
+    department: "Sales",
+    position: "Sales Executive",
+    status: "active",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=David",
+    joinDate: "2024-01-08",
+  },
+];
+
+export const mockTeamAttendance = [
+  {
+    id: 1,
+    name: "Alice Johnson",
+    date: "2024-01-25",
+    status: "present",
+    checkIn: "09:05",
+    checkOut: "18:10",
+  },
+  {
+    id: 2,
+    name: "Bob Smith",
+    date: "2024-01-25",
+    status: "present",
+    checkIn: "09:10",
+    checkOut: "17:55",
+  },
+  {
+    id: 3,
+    name: "Carol Davis",
+    date: "2024-01-25",
+    status: "absent",
+    checkIn: "-",
+    checkOut: "-",
+  },
+  {
+    id: 4,
+    name: "David Wilson",
+    date: "2024-01-25",
+    status: "late",
+    checkIn: "10:15",
+    checkOut: "19:00",
+  },
+];
+
+export const mockTeamLeaves = [
+  {
+    id: 1,
+    name: "Alice Johnson",
+    type: "Sick Leave",
+    from: "2024-01-20",
+    to: "2024-01-21",
+    status: "pending",
+  },
+  {
+    id: 2,
+    name: "Bob Smith",
+    type: "Vacation",
+    from: "2024-02-01",
+    to: "2024-02-03",
+    status: "approved",
+  },
+  {
+    id: 3,
+    name: "Carol Davis",
+    type: "Personal Leave",
+    from: "2024-01-15",
+    to: "2024-01-16",
+    status: "rejected",
+  },
+];

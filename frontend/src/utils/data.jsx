@@ -1,0 +1,105 @@
+// utils/data.js
+export const mockManagers = [
+  {
+    id: 1,
+    name: "John Smith",
+    email: "john.smith@company.com",
+    department: "Engineering",
+    status: "active",
+    employees: 15,
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
+    joinDate: "2023-01-15",
+  },
+  {
+    id: 2,
+    name: "Sarah Johnson",
+    email: "sarah.j@company.com",
+    department: "Marketing",
+    status: "active",
+    employees: 8,
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
+    joinDate: "2023-03-10",
+  },
+  {
+    id: 3,
+    name: "Mike Wilson",
+    email: "mike.w@company.com",
+    department: "Sales",
+    status: "inactive",
+    employees: 12,
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
+    joinDate: "2022-11-20",
+  },
+  {
+    id: 4,
+    name: "Lisa Wong",
+    email: "lisa.w@company.com",
+    department: "HR",
+    status: "active",
+    employees: 5,
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa",
+    joinDate: "2024-01-05",
+  },
+];
+
+export const mockAttendance = [
+  {
+    id: 1,
+    name: "John Smith",
+    date: "2024-01-25",
+    status: "present",
+    checkIn: "09:00",
+    checkOut: "18:00",
+  },
+  {
+    id: 2,
+    name: "Sarah Johnson",
+    date: "2024-01-25",
+    status: "present",
+    checkIn: "09:15",
+    checkOut: "17:45",
+  },
+  {
+    id: 3,
+    name: "Mike Wilson",
+    date: "2024-01-25",
+    status: "absent",
+    checkIn: "-",
+    checkOut: "-",
+  },
+  {
+    id: 4,
+    name: "Lisa Wong",
+    date: "2024-01-25",
+    status: "late",
+    checkIn: "10:30",
+    checkOut: "19:00",
+  },
+];
+
+export const mockLeaves = [
+  {
+    id: 1,
+    name: "John Smith",
+    type: "Sick Leave",
+    from: "2024-01-20",
+    to: "2024-01-22",
+    status: "approved",
+  },
+  {
+    id: 2,
+    name: "Sarah Johnson",
+    type: "Vacation",
+    from: "2024-02-01",
+    to: "2024-02-05",
+    status: "pending",
+  },
+  {
+    id: 3,
+    name: "Mike Wilson",
+    type: "Personal Leave",
+    from: "2024-01-15",
+    to: "2024-01-16",
+    status: "rejected",
+  },
+];
