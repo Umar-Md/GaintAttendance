@@ -12,7 +12,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 import Dashboard from "./DashBoard";
-import ManageHRs from "./ManageHrs";
+import ManageHRs from "./ManageHRs";
 import SuperAdminProfile from "./SuperAdminProfile";
 import SettingsPage from "./Settings";
 import FloatingChat from "../FloatingChat";
