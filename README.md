@@ -34,6 +34,11 @@ npm run dev
 
 By default the backend runs on `http://localhost:7000` and the frontend runs on `http://localhost:5173`.
 
+The frontend has mode-specific API URLs:
+
+- `npm run dev` uses `frontend/.env.development` and calls `http://localhost:7000`
+- `npm run build` uses `frontend/.env.production` and calls `https://attendance.gaintclout.com`
+
 ## Deployment
 
 Backend:
@@ -52,3 +57,18 @@ Frontend:
 - Optional environment variables: `VITE_CLOUDINARY_CLOUD_NAME`, `VITE_CLOUDINARY_UPLOAD_PRESET`
 
 If frontend and backend are on different domains, keep `CLIENT_URL` on the backend exactly equal to the deployed frontend origin, for example `https://your-app.vercel.app`.
+
+For the current deployed frontend at `https://attendance.gaintclout.com`, the backend must include:
+
+```sh
+CLIENT_URL=https://attendance.gaintclout.com
+ENVI=production
+```
+
+The frontend production build already uses:
+
+```sh
+VITE_API_URL=https://attendance.gaintclout.com
+```
+
+After changing any `VITE_*` variable or `.env.production`, rebuild and redeploy the frontend because Vite embeds these values at build time.

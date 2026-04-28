@@ -1,4 +1,12 @@
-const backendURI = (import.meta.env.VITE_API_URL || "http://localhost:7000").replace(/\/$/, "");
+const localBackendURI = "http://localhost:7000";
+const isLocalHost =
+  typeof window !== "undefined" &&
+  ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
+const backendURI = (
+  import.meta.env.VITE_API_URL ||
+  (isLocalHost ? localBackendURI : window.location.origin)
+).replace(/\/$/, "");
 
 const userURI = `${backendURI}/user`;
 const employeeURI = `${backendURI}/employee`;

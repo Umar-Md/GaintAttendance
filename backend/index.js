@@ -98,14 +98,21 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 7000;
-const allowedOrigins = (
-  process.env.CLIENT_URL ||
-  process.env.FRONTEND_URL ||
-  "http://localhost:5173"
-)
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const defaultOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5174",
+  "https://attendance.gaintclout.com",
+];
+
+const allowedOrigins = [
+  ...defaultOrigins,
+  ...`${process.env.CLIENT_URL || ""},${process.env.FRONTEND_URL || ""}`
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+].filter((origin, index, origins) => origins.indexOf(origin) === index);
 
 const corsOptions = {
   origin(origin, callback) {
@@ -113,7 +120,7 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    return callback(new Error(`CORS blocked origin: ${origin}`));
+    return callback(null, false);
   },
   credentials: true,
 };
