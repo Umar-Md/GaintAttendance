@@ -97,6 +97,26 @@ import employeeTaskRouter from "./routers/EmployeeTaskRoutes.js";
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 7000;
+const allowedOrigins = (
+  process.env.CLIENT_URL ||
+  process.env.FRONTEND_URL ||
+  "http://localhost:5173"
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked origin: ${origin}`));
+  },
+  credentials: true,
+};
 
 /* ---------- MIDDLEWARE ---------- */
 // Parse JSON (also tolerates Postman sending JSON as text/plain)
@@ -108,17 +128,16 @@ app.use(
 // Allow Postman/HTML form submissions (x-www-form-urlencoded)
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
 
 /* ---------- DATABASE ---------- */
 connectDB();
 
 /* ---------- ROUTES ---------- */
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.use("/user", userRoute);
 app.use("/hr", hrRoute);
 app.use("/manager", managerRoute);
@@ -133,7 +152,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   },
 });
@@ -141,9 +160,6 @@ const io = new Server(server, {
 initSocket(io);
 
 /* ---------- START SERVER ---------- */
-const PORT = process.env.PORT || 5000;
-
-/* ---------- START SERVER ---------- */
-server.listen(process.env.PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${process.env.PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });

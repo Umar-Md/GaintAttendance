@@ -371,6 +371,15 @@ const forgotPassword = async (req, res) => {
     user.otp = otp;
     await user.save();
 
+    const frontendURL = (
+      process.env.CLIENT_URL ||
+      process.env.FRONTEND_URL ||
+      "http://localhost:5173"
+    )
+      .split(",")[0]
+      .trim()
+      .replace(/\/$/, "");
+
     // Send OTP email
     await sendEmail({
       from: {
@@ -389,7 +398,7 @@ const forgotPassword = async (req, res) => {
         <p>This OTP is valid for one use only.</p>
 
         <br/>
-        <a href="http://localhost:5173/reset-password">Reset Password</a>
+        <a href="${frontendURL}/reset-password">Reset Password</a>
         <br/>
         <p>Regards,<br/>HRMS Team</p>
       `,

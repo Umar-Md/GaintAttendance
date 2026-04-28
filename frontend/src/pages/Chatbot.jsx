@@ -2,8 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import io from "socket.io-client";
 import { FiX, FiSend, FiMessageCircle } from "react-icons/fi";
-
-const SOCKET_URL = "http://localhost:7000";
+import { backendURI } from "../mainApi";
 
 const ChatbotUI = ({ user }) => {
   const [open, setOpen] = useState(false);
@@ -18,7 +17,7 @@ const ChatbotUI = ({ user }) => {
   useEffect(() => {
     if (!open || !user) return;
 
-    socketRef.current = io(SOCKET_URL, { withCredentials: true });
+    socketRef.current = io(backendURI, { withCredentials: true });
 
     socketRef.current.emit("join_chat", {
       type: chatType,

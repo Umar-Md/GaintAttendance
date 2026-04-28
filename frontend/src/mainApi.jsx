@@ -1,4 +1,4 @@
-const backendURI = "http://localhost:7000";
+const backendURI = (import.meta.env.VITE_API_URL || "http://localhost:7000").replace(/\/$/, "");
 
 const userURI = `${backendURI}/user`;
 const employeeURI = `${backendURI}/employee`;
@@ -9,8 +9,8 @@ const messageURI = `${backendURI}/messages`;
 const managerTaskURI = `${backendURI}/managerTasks`;
 const employeeTaskURI = `${backendURI}/employeeTasks`;
 
-const CLOUD_NAME = "davofmwez";
-const preset = "nutrition-preset";
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "davofmwez";
+const preset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "nutrition-preset";
 
 export {
   backendURI,
