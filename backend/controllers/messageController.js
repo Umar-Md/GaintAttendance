@@ -294,7 +294,7 @@
       res.json({ success: true, message: "Message deleted" });
     } catch (err) {
       res.status(500).json({ success: false, message: err.message });
-    }c
+    }
   };
   /* =========================
     UPDATE (EDIT) MESSAGE
