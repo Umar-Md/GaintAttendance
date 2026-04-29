@@ -238,7 +238,7 @@ const EmployeeDashboardPage = () => {
         <div className="p-6 border-t mt-4 border-gray-400 position-fixed bottom-0">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-5 py-3.5 w-full bg-red-600 hover:bg-red-500 text-black hover:text-white rounded-xl transition-all group font-bold text-sm"
+            className="flex items-center gap-3 px-5 py-3.5 w-full bg-red-600 hover:bg-red-500 text-white hover:text-white rounded-xl transition-all group font-bold text-sm"
           >
             <LogOut
               size={18}

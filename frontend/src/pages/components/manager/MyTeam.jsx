@@ -117,7 +117,7 @@ const MyTeam = ({ team, searchTerm, setSearchTerm, fetchTeam }) => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-4xl font-black text-slate-900 ">
-              My Team
+            Team
             </h2>
             <p className="text-slate-600 text-m font-medium mt-1">
               Manage your department members and their account status.

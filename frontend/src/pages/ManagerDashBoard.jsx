@@ -219,7 +219,7 @@ const ManagerDashboardPage = () => {
             { key: "dashboard", icon: Home, label: "Dashboard" },
             { key: "profile", icon: User, label: "Profile" },
             { key: "projects", icon: ClipboardList, label: "Projects" },
-            { key: "myteam", icon: Users, label: "My Team" },
+            { key: "myteam", icon: Users, label: "Team" },
           ].map((item) => (
             <SidebarItem
               key={item.key}

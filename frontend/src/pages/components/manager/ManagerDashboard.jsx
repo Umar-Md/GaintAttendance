@@ -48,22 +48,6 @@ const ManagerDashboard = ({ user, attendance = [], leaves = [], team = [] }) => 
             </div>
           </div>
         </div>
-
-        {/* Pending Leaves Section Commented Out 
-        <div className="relative overflow-hidden bg-amber-50 p-6 rounded-2xl border border-amber-100 shadow-sm transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_20px_40px_-10px_rgba(245,158,11,0.4)] cursor-default group">
-          <div className="flex items-center justify-between relative z-10">
-            <div>
-              <p className="text-amber-700 text-[14px] font-bold">Pending Leaves</p>
-              <p className="text-3xl font-black text-amber-900 mt-1">
-                {leaves.filter((l) => l.status === "pending").length}
-              </p>
-            </div>
-            <div className="p-3 bg-amber-100 rounded-xl">
-              <CalendarDays className="w-6 h-6 text-amber-600" />
-            </div>
-          </div>
-        </div>
-        */}
       </div>
 
       {/* TABLE SECTION */}
