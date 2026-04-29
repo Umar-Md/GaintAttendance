@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { superAdminURI } from "../../../mainApi";
-import { UserPlus, Mail, Lock, Phone, Power, PowerOff } from "lucide-react";
+import { UserPlus, Mail, Lock, Phone, Power, PowerOff, Trash2 } from "lucide-react";
 
 const ManageHRs = () => {
   const [hrs, setHrs] = useState([]);
@@ -43,6 +43,23 @@ const ManageHRs = () => {
     } catch (error) {
       console.error("Toggle HR error:", error);
       alert(error.response?.data?.message || "Action failed");
+    }
+  };
+
+  const deleteHR = async (hr) => {
+    const confirmed = window.confirm(
+      `Delete ${hr.userName} permanently? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`${superAdminURI}/hr/${hr._id}`, {
+        withCredentials: true,
+      });
+      fetchHRs();
+    } catch (error) {
+      console.error("Delete HR error:", error);
+      alert(error.response?.data?.message || "Failed to delete HR");
     }
   };
 
@@ -156,6 +173,13 @@ const ManageHRs = () => {
                   ) : (
                     <><Power size={16} /> <span className="whitespace-nowrap">Activate</span></>
                   )}
+                </button>
+                <button
+                  onClick={() => deleteHR(hr)}
+                  className="flex items-center gap-2 px-4 sm:px-5 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer bg-red-600 text-white hover:bg-red-700"
+                >
+                  <Trash2 size={16} />
+                  <span className="whitespace-nowrap">Delete</span>
                 </button>
               </div>
             </div>

@@ -111,6 +111,33 @@ const activateManager = async (req, res) => {
   }
 };
 
+const permanentlyDeleteManager = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ message: "Manager id is required" });
+  }
+
+  try {
+    const manager = await User.findOneAndDelete({
+      _id: id,
+      hrId: req.userId,
+      role: "Manager",
+    });
+
+    if (!manager) {
+      return res.status(404).json({ message: "Manager not found" });
+    }
+
+    return res.status(200).json({
+      message: "Manager deleted permanently",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const addPublicHoliday = async (req, res) => {
   try {
     const { name, date, type } = req.body;
@@ -482,6 +509,7 @@ export {
   getEmployees,
   deleteManager,
   activateManager,
+  permanentlyDeleteManager,
   addPublicHoliday,
   viewAttendance,
   getManagersAttendanceForHR,

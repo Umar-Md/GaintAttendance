@@ -12,6 +12,7 @@ import {
   MoreVertical,
   Mail,
   Users,
+  Trash2,
 } from "lucide-react";
 import { hrURI, userURI } from "../../../mainApi";
 
@@ -21,6 +22,7 @@ const ManageManagers = ({
   setSearchTerm,
   handleActivateManager,
   handleDeactivateManager,
+  handleDeleteManager,
 }) => {
   const [formOpen, setFormOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -255,6 +257,13 @@ const handleEditManager = (manager) => {
   className="p-3 border border-slate-100 rounded-xl hover:bg-slate-50 transition-all text-slate-400 hover:text-blue-600 shadow-sm"
 >
   <Edit className="w-4 h-4" />
+</button>
+
+<button
+  onClick={() => handleDeleteManager(manager)}
+  className="p-3 border border-red-100 rounded-xl bg-red-50 transition-all text-red-600 hover:bg-red-600 hover:text-white shadow-sm"
+>
+  <Trash2 className="w-4 h-4" />
 </button>
 
             </div>

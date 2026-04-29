@@ -18,6 +18,7 @@ import {
   updateProfile,
   getMyProjects,
   getSprintsByProject,
+  permanentlyDeleteEmployee,
 } from "../controllers/managerController.js";
 
 const managerRoute = express.Router();
@@ -43,6 +44,20 @@ managerRoute.patch(
   verifyToken,
   managerOnly,
   activateEmployee,
+);
+
+managerRoute.delete(
+  "/employees/:id",
+  verifyToken,
+  managerOnly,
+  permanentlyDeleteEmployee,
+);
+
+managerRoute.patch(
+  "/employees/:id/delete-permanent",
+  verifyToken,
+  managerOnly,
+  permanentlyDeleteEmployee,
 );
 
 managerRoute.get(

@@ -98,6 +98,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 7000;
+const isProduction = process.env.ENVI === "production";
 const defaultOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
@@ -108,21 +109,45 @@ const defaultOrigins = [
 
 const allowedOrigins = [
   ...defaultOrigins,
-  ...`${process.env.CLIENT_URL || ""},${process.env.FRONTEND_URL || ""}`
+  ...`${process.env.CLIENT_URL || ""},${process.env.FRONTEND_URL || ""},${
+    process.env.CORS_ORIGIN || ""
+  },${process.env.CORS_ORIGINS || ""}`
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean),
 ].filter((origin, index, origins) => origins.indexOf(origin) === index);
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+
+  try {
+    const { hostname, protocol } = new URL(origin);
+    const isLocalDevOrigin =
+      !isProduction &&
+      ["localhost", "127.0.0.1"].includes(hostname) &&
+      ["http:", "https:"].includes(protocol);
+    const isGaintSubdomain =
+      protocol === "https:" &&
+      (hostname === "gaintclout.com" || hostname.endsWith(".gaintclout.com"));
+
+    return isLocalDevOrigin || isGaintSubdomain;
+  } catch {
+    return false;
+  }
+};
+
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
 
+    console.warn(`CORS blocked origin: ${origin}`);
     return callback(null, false);
   },
   credentials: true,
+  optionsSuccessStatus: 204,
 };
 
 /* ---------- MIDDLEWARE ---------- */
@@ -159,7 +184,14 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin(origin, callback) {
+      if (isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
+
+      console.warn(`Socket CORS blocked origin: ${origin}`);
+      return callback(null, false);
+    },
     credentials: true,
   },
 });

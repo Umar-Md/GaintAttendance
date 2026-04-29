@@ -199,7 +199,7 @@
     try {
       const senderId = req.userId;
       const receiverId = req.params.id;
-      const { text, fileUrl, fileType } = req.body;
+      const { text, fileUrl, fileType, fileName } = req.body;
 
       // Check if chat already accepted
       const existingConnection = await ChatMessageModel.findOne({
@@ -217,6 +217,7 @@
         text,
         fileUrl,
         fileType,
+        fileName,
         status,
       });
 

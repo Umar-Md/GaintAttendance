@@ -47,6 +47,7 @@ const chatMessageSchema = new mongoose.Schema(
     },
     text: { type: String },
     fileUrl: { type: String },
+    fileName: { type: String },
     fileType: {
       type: String,
       enum: ["image", "video", "document"],

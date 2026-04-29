@@ -19,6 +19,13 @@ import FloatingChat from "../FloatingChat";
 
 import { superAdminURI, userURI } from "../../../mainApi";
 
+const PAGE_TITLES = {
+  dashboard: "Overview",
+  hrs: "HR Management",
+  profile: "Profile Settings",
+  settings: "Settings",
+};
+
 const SuperAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [profile, setProfile] = useState(null);
@@ -144,10 +151,7 @@ const SuperAdminDashboard = () => {
               <Menu size={24} />
             </button>
             <h1 className="text-lg sm:text-xl font-black text-gray-800 capitalize">
-              {activeTab === "dashboard" && "Overview"}
-              {activeTab === "hrs" && "HR Management"}
-              {activeTab === "profile" && "Profile Settings"}
-              {activeTab === "settings" && "System Settings"}
+              {PAGE_TITLES[activeTab] || "Super Admin"}
             </h1>
           </div>
           

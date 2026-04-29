@@ -5,6 +5,7 @@ import User from "../models/userModel.js";
 import sendEmail from "../utils/sendEmail.js";
 import Project from "../models/Project.js";
 import Sprint from "../models/Sprint.js";
+import mongoose from "mongoose";
 
 const getManagerProfile = async (req, res) => {
   try {
@@ -65,6 +66,33 @@ const activateEmployee = async (req, res) => {
   await employee.save();
 
   return res.json({ message: "Employee activated" });
+};
+
+const permanentlyDeleteEmployee = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid employee id" });
+  }
+
+  try {
+    const employee = await User.findOneAndDelete({
+      _id: id,
+      managerId: req.userId,
+      role: "Employee",
+    });
+
+    if (!employee) {
+      return res.status(404).json({
+        message: "Employee not found under your team",
+      });
+    }
+
+    return res.json({ message: "Employee deleted permanently" });
+  } catch (error) {
+    console.error("Permanent employee delete failed:", error);
+    return res.status(500).json({ message: "Failed to delete employee" });
+  }
 };
 
 const getTodayAttendance = async (req, res) => {
@@ -432,6 +460,7 @@ export {
   getManagerProfile,
   getMyEmployees,
   deactivateEmployee,
+  permanentlyDeleteEmployee,
   getTodayAttendance,
   getMonthlyAttendance,
   getTeamLeaves,

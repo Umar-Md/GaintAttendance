@@ -2,9 +2,15 @@ const localBackendURI = "http://localhost:7000";
 const isLocalHost =
   typeof window !== "undefined" &&
   ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const configuredBackendURI = import.meta.env.VITE_API_URL;
+const configuredBackendIsLocal =
+  configuredBackendURI &&
+  /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(
+    configuredBackendURI.replace(/\/$/, "")
+  );
 
 const backendURI = (
-  import.meta.env.VITE_API_URL ||
+  (configuredBackendIsLocal && !isLocalHost ? "" : configuredBackendURI) ||
   (isLocalHost ? localBackendURI : window.location.origin)
 ).replace(/\/$/, "");
 

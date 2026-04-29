@@ -3,6 +3,8 @@ import axios from "axios";
 import socket from "../socket";
 import { messageURI } from "../../mainApi";
 
+const getId = (value) => value?._id || value?.id || value?.toString?.() || value;
+
 /* 🎨 ROLE COLORS */
 const ROLE_COLORS = {
   hr: "#E5534A",
@@ -38,10 +40,13 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
 
     loadUsers();
 
-    socket.on("newMessage", (msg) => {
+    const handleNewMessage = (msg) => {
+      const senderId = getId(msg.sender);
+      const receiverId = getId(msg.receiver);
+
       setUsers((prevUsers) => {
         return prevUsers.map((u) => {
-          if (u._id === msg.sender || u._id === msg.receiver) {
+          if (u._id === senderId || u._id === receiverId) {
             return { 
               ...u, 
               lastMessage: { 
@@ -54,15 +59,17 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
         });
       });
 
-      if (msg.sender !== selectedUser?._id) {
+      if (senderId !== selectedUser?._id) {
         setUnseen((prev) => ({
           ...prev,
-          [msg.sender]: (prev[msg.sender] || 0) + 1,
+          [senderId]: (prev[senderId] || 0) + 1,
         }));
       }
-    });
+    };
 
-    return () => socket.off("newMessage");
+    socket.on("newMessage", handleNewMessage);
+
+    return () => socket.off("newMessage", handleNewMessage);
   }, [selectedUser?._id]);
 
   const filteredAndSortedUsers = users

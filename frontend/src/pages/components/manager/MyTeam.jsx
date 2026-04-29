@@ -14,6 +14,7 @@ import {
   Phone,
   Lock,
   X,
+  Trash2,
 } from "lucide-react";
 import axios from "axios";
 import { managerURI, userURI } from "../../../mainApi";
@@ -86,6 +87,28 @@ const MyTeam = ({ team, searchTerm, setSearchTerm, fetchTeam }) => {
       fetchTeam();
     } catch (error) {
       alert("Failed to activate employee");
+    }
+  };
+
+  const handleDelete = async (employee) => {
+    const confirmed = window.confirm(
+      `Delete ${employee.name} permanently? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await axios.patch(
+        `${managerURI}/employees/${employee.id}/delete-permanent`,
+        {},
+        { withCredentials: true }
+      );
+      fetchTeam();
+    } catch (error) {
+      console.error("Delete employee failed:", error);
+      alert(
+        error.response?.data?.message ||
+          `Failed to delete employee (${error.response?.status || "network error"})`
+      );
     }
   };
 
@@ -226,6 +249,12 @@ const MyTeam = ({ team, searchTerm, setSearchTerm, fetchTeam }) => {
                     <CheckCircle className="w-4 h-4" /> Activate Account
                   </button>
                 )}
+                <button
+                  onClick={() => handleDelete(employee)}
+                  className="bg-red-50 text-red-600 px-4 py-3 rounded-xl font-bold text-xs hover:bg-red-600 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <Trash2 className="w-4 h-4" /> Delete
+                </button>
               </div>
             </div>
           ))}

@@ -16,6 +16,7 @@ import {
   createProject,
   getAllProjectsForHR,
   getProjectProgress,
+  permanentlyDeleteManager,
 } from "../controllers/hrController.js";
 import { onlyHr, verifyToken } from "../middleware/authMiddleware.js";
 
@@ -26,6 +27,7 @@ hrRoute.get("/getManagers", verifyToken, onlyHr, getManagers);
 hrRoute.get("/getEmployees", verifyToken, onlyHr, getEmployees);
 hrRoute.patch("/activateManager/:id", verifyToken, onlyHr, activateManager);
 hrRoute.patch("/deleteManager/:id", verifyToken, onlyHr, deleteManager);
+hrRoute.delete("/manager/:id", verifyToken, onlyHr, permanentlyDeleteManager);
 hrRoute.post("/addHoliday", verifyToken, onlyHr, addPublicHoliday);
 hrRoute.get("/attendance", verifyToken, onlyHr, viewAttendance);
 hrRoute.get("/holidays", verifyToken, onlyHr, getAllHolidays);

@@ -6,6 +6,7 @@ import {
   getAllHRs,
   getSuperAdminDetails,
   getSystemStats,
+  permanentlyDeleteHR,
   updateSuperAdminProfile,
 } from "../controllers/superAdminController.js";
 import { superAdminOnly, verifyToken } from "../middleware/authMiddleware.js";
@@ -26,6 +27,12 @@ superAdminRoute.put(
   verifyToken,
   superAdminOnly,
   activateHR
+);
+superAdminRoute.delete(
+  "/hr/:id",
+  verifyToken,
+  superAdminOnly,
+  permanentlyDeleteHR
 );
 superAdminRoute.put(
   "/update-profile",

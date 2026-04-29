@@ -260,6 +260,19 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
   const videoRef = useRef(null);
   const bottomRef = useRef(null);
 
+  const getId = (value) => value?._id || value?.id || value?.toString?.() || value;
+  const appendMessageOnce = (message) => {
+    if (!message?._id) return;
+
+    setMessages((prev) => {
+      if (prev.some((existing) => existing._id === message._id)) {
+        return prev;
+      }
+
+      return [...prev, message];
+    });
+  };
+
   // 1. Load Messages and Setup Status Logic
   useEffect(() => {
     if (!selectedUser?._id) return;
@@ -274,7 +287,7 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
 
         // BANNER LOGIC: Show if last message is 'pending' and sent by the other person
         const lastMsg = msgs[msgs.length - 1];
-        if (lastMsg && lastMsg.status === "pending" && lastMsg.sender === selectedUser._id) {
+        if (lastMsg && lastMsg.status === "pending" && getId(lastMsg.sender) === selectedUser._id) {
           setIsRequestPending(true);
         } else {
           setIsRequestPending(false);
@@ -287,20 +300,23 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
     loadMessages();
 
     // 2. Real-time Socket Listeners
-    socket.on("newMessage", (msg) => {
-      if (msg.sender === selectedUser._id || msg.receiver === selectedUser._id) {
-        setMessages((prev) => [...prev, msg]);
-        if (msg.sender === selectedUser._id && msg.status === "pending") {
+    const handleNewMessage = (msg) => {
+      const senderId = getId(msg.sender);
+      const receiverId = getId(msg.receiver);
+
+      if (senderId === selectedUser._id || receiverId === selectedUser._id) {
+        appendMessageOnce(msg);
+        if (senderId === selectedUser._id && msg.status === "pending") {
           setIsRequestPending(true);
         }
       }
-    });
+    };
 
-    socket.on("messageDeleted", (messageId) => {
+    const handleMessageDeleted = (messageId) => {
       setMessages((prev) => prev.filter((m) => m._id !== messageId));
-    });
+    };
 
-    socket.on("messageUpdated", (updatedMsg) => {
+    const handleMessageUpdated = (updatedMsg) => {
       setMessages((prev) =>
         prev.map((m) => (m._id === updatedMsg._id ? updatedMsg : m))
       );
@@ -308,12 +324,16 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
       if (updatedMsg.status !== 'pending') {
           setIsRequestPending(false);
       }
-    });
+    };
+
+    socket.on("newMessage", handleNewMessage);
+    socket.on("messageDeleted", handleMessageDeleted);
+    socket.on("messageUpdated", handleMessageUpdated);
 
     return () => {
-      socket.off("newMessage");
-      socket.off("messageDeleted");
-      socket.off("messageUpdated");
+      socket.off("newMessage", handleNewMessage);
+      socket.off("messageDeleted", handleMessageDeleted);
+      socket.off("messageUpdated", handleMessageUpdated);
     };
   }, [selectedUser?._id]);
 
@@ -416,21 +436,36 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
     const data = new FormData();
     data.append("file", file);
     data.append("upload_preset", preset);
-    let resource = file.type.startsWith("video") ? "video" : file.type.includes("pdf") ? "raw" : "image";
+    const resource = file.type.startsWith("video")
+      ? "video"
+      : file.type.startsWith("image")
+        ? "image"
+        : "raw";
+
     const res = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${resource}/upload`, data);
-    return { url: res.data.secure_url, type: resource === "raw" ? "document" : resource };
+    return {
+      url: res.data.secure_url,
+      type: resource === "raw" ? "document" : resource,
+      name: file.name,
+    };
   };
 
   const handleFileUpload = async (file) => {
     if (!file) return;
     try {
       setIsUploading(true);
-      const { url, type } = await uploadToCloudinary(file);
-      const res = await axios.post(`${messageURI}/send/${selectedUser._id}`, { fileUrl: url, fileType: type }, { withCredentials: true });
-      setMessages((prev) => [...prev, res.data.newMessage]);
+      const { url, type, name } = await uploadToCloudinary(file);
+      const res = await axios.post(
+        `${messageURI}/send/${selectedUser._id}`,
+        { fileUrl: url, fileType: type, fileName: name },
+        { withCredentials: true }
+      );
+      appendMessageOnce(res.data.newMessage);
     } catch (error) {
       console.error("Upload failed", error);
-    } finally { setIsUploading(false); }
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const sendMessage = async () => {
@@ -444,7 +479,7 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
         setEditingMessage(null);
       } else {
         const res = await axios.post(`${messageURI}/send/${selectedUser._id}`, { text }, { withCredentials: true });
-        setMessages((prev) => [...prev, res.data.newMessage]);
+        appendMessageOnce(res.data.newMessage);
       }
       setText("");
     } catch (error) { console.error("Action failed", error); }
@@ -501,7 +536,16 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
               <FiPaperclip size={20} className={isUploading ? "animate-spin" : ""} />
             </button>
             <button onClick={startCamera} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"><FiCamera size={20} /></button>
-            <input type="file" hidden id="fileInput" accept="image/*,video/*,.pdf,.doc" onChange={(e) => handleFileUpload(e.target.files[0])} />
+            <input
+              type="file"
+              hidden
+              id="fileInput"
+              accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+              onChange={(e) => {
+                handleFileUpload(e.target.files[0]);
+                e.target.value = "";
+              }}
+            />
             <input
               value={text}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}

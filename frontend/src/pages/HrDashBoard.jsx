@@ -131,6 +131,23 @@ const HRDashboard = () => {
     }
   };
 
+  const handleDeleteManager = async (manager) => {
+    const confirmed = window.confirm(
+      `Delete ${manager.name} permanently? This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`${hrURI}/manager/${manager.id}`, {
+        withCredentials: true,
+      });
+      await fetchManagers();
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to delete manager");
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await axios.get(`${userURI}/logout`, { withCredentials: true });
@@ -156,6 +173,7 @@ const HRDashboard = () => {
             setSearchTerm={setSearchTerm}
             handleActivateManager={handleActivateManager}
             handleDeactivateManager={handleDeactivateManager}
+            handleDeleteManager={handleDeleteManager}
           />
         );
       case "projects":

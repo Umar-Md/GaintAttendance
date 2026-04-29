@@ -156,6 +156,28 @@ const activateHR = async (req, res) => {
 };
 
 /**
+ * 🔹 Permanently Delete HR
+ */
+const permanentlyDeleteHR = async (req, res) => {
+  try {
+    const hr = await User.findOneAndDelete({
+      _id: req.params.id,
+      role: "Hr",
+    });
+
+    if (!hr) {
+      return res.status(404).json({ message: "HR not found" });
+    }
+
+    res.status(200).json({
+      message: "HR deleted permanently",
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/**
  * 🔹 System Overview (Optional but useful)
  */
 const getSystemStats = async (req, res) => {
@@ -196,6 +218,7 @@ export {
   getAllHRs,
   deactivateHR,
   activateHR,
+  permanentlyDeleteHR,
   getSystemStats,
   updateSuperAdminProfile,
 };
