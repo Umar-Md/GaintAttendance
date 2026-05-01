@@ -261,7 +261,7 @@ const startAttendance = async (req, res) => {
   }
 };
 
-const REQUIRED_HOURS = 0.01; // company policy
+const REQUIRED_HOURS = 8; // company policy: 8 hours count as a valid day
 
 const endAttendance = async (req, res) => {
   try {

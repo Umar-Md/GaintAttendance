@@ -1,6 +1,7 @@
 
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
+import Attendance from "../models/attendanceModel.js";
 
 /**
  * 🔹 Get SuperAdmin profile
@@ -212,6 +213,46 @@ const getSystemStats = async (req, res) => {
   }
 };
 
+const getAllAttendance = async (req, res) => {
+  try {
+    const { from, to, role } = req.query;
+
+    const attendanceQuery = {};
+    if (from || to) {
+      attendanceQuery.date = {};
+      if (from) attendanceQuery.date.$gte = from;
+      if (to) attendanceQuery.date.$lte = to;
+    }
+
+    const userMatch = {
+      role: role && role !== "All" ? role : { $in: ["Hr", "Manager", "Employee"] },
+    };
+
+    const attendance = await Attendance.find(attendanceQuery)
+      .populate({
+        path: "userId",
+        match: userMatch,
+        select: "userName email role department managerId hrId superAdminId",
+        populate: [
+          { path: "managerId", select: "userName email" },
+          { path: "hrId", select: "userName email" },
+          { path: "superAdminId", select: "userName email" },
+        ],
+      })
+      .sort({ date: -1, startTime: -1 });
+
+    const filteredAttendance = attendance.filter((record) => record.userId);
+
+    return res.status(200).json({
+      count: filteredAttendance.length,
+      data: filteredAttendance,
+    });
+  } catch (error) {
+    console.error("SuperAdmin attendance error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 export {
   getSuperAdminDetails,
   createHR,
@@ -221,4 +262,5 @@ export {
   permanentlyDeleteHR,
   getSystemStats,
   updateSuperAdminProfile,
+  getAllAttendance,
 };

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   Home,
+  Clock,
   Users,
   User,
   Settings,
@@ -15,6 +16,7 @@ import Dashboard from "./DashBoard";
 import ManageHRs from "./ManageHRs";
 import SuperAdminProfile from "./SuperAdminProfile";
 import SettingsPage from "./Settings";
+import AttendanceReports from "./AttendanceReports";
 import FloatingChat from "../FloatingChat";
 
 import { superAdminURI, userURI } from "../../../mainApi";
@@ -22,6 +24,7 @@ import { superAdminURI, userURI } from "../../../mainApi";
 const PAGE_TITLES = {
   dashboard: "Overview",
   hrs: "HR Management",
+  attendance: "Attendance Reports",
   profile: "Profile Settings",
   settings: "Settings",
 };
@@ -63,6 +66,8 @@ const SuperAdminDashboard = () => {
         return <Dashboard />;
       case "hrs":
         return <ManageHRs />;
+      case "attendance":
+        return <AttendanceReports />;
       case "profile":
         return <SuperAdminProfile profile={profile} />;
       case "settings":
@@ -111,6 +116,13 @@ const SuperAdminDashboard = () => {
             label="Manage HRs"
             active={activeTab === "hrs"}
             onClick={() => { setActiveTab("hrs"); closeSidebar(); }}
+          />
+
+          <SidebarButton
+            icon={<Clock size={20} />}
+            label="Attendance"
+            active={activeTab === "attendance"}
+            onClick={() => { setActiveTab("attendance"); closeSidebar(); }}
           />
 
           <SidebarButton

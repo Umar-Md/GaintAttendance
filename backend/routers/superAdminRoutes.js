@@ -3,6 +3,7 @@ import {
   activateHR,
   createHR,
   deactivateHR,
+  getAllAttendance,
   getAllHRs,
   getSuperAdminDetails,
   getSystemStats,
@@ -42,5 +43,11 @@ superAdminRoute.put(
 );
 
 superAdminRoute.get("/stats", verifyToken, superAdminOnly, getSystemStats);
+superAdminRoute.get(
+  "/attendance",
+  verifyToken,
+  superAdminOnly,
+  getAllAttendance
+);
 
 export default superAdminRoute;
