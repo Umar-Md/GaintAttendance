@@ -91,6 +91,14 @@ const Message = ({ msg, myId, onEdit, onDelete }) => {
   const hasFile = Boolean(msg.fileUrl);
   const fileType = msg.fileType || "document";
   const fileName = msg.fileName || "Open file";
+  const sentAt = msg.createdAt || msg.updatedAt || null;
+  const timeLabel = sentAt
+    ? new Date(sentAt).toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })
+    : "";
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -154,6 +162,17 @@ const Message = ({ msg, myId, onEdit, onDelete }) => {
         {msg.isEdited && <span className="text-[9px] block mb-1 opacity-70 italic">(edited)</span>}
         {msg.text && <p className="text-sm break-words">{msg.text}</p>}
         {renderFile()}
+        {timeLabel && (
+          <div className="mt-1 flex justify-end">
+            <span
+              className={`text-[10px] font-bold ${
+                isMine ? "text-white/80" : "text-slate-400"
+              }`}
+            >
+              {timeLabel}
+            </span>
+          </div>
+        )}
 
         {/* Triple Dot Menu - Now visible to both but Edit only for owner */}
         <div className="absolute top-2 -left-6" ref={menuRef}>

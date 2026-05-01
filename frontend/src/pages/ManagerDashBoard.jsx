@@ -201,7 +201,7 @@ const ManagerDashboardPage = () => {
             <div className="w-10 h-10 bg-[#618DF4] rounded-xl flex items-center justify-center">
               <LayoutGrid className="text-white w-6 h-6" />
             </div>
-            <span className="font-black text-xl italic">
+            <span className="font-black text-xl century-gothic">
               Manager<span className="text-[#618DF4]">.</span>
             </span>
           </div>

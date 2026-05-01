@@ -91,7 +91,7 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
     });
 
   return (
-    <div className="w-80 bg-white border-r shadow-2xl h-full flex flex-col text-sm">
+    <div className="w-full bg-white border-r shadow-2xl h-full flex flex-col text-sm">
       <div className="p-4 text-lg font-bold text-indigo-400 border-b">Gaint Chat</div>
 
       <div className="p-3 space-y-2 border-b">

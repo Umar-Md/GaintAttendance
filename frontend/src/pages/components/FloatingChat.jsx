@@ -3,7 +3,11 @@ import axios from "axios";
 import ChatPage from "../Chat/ChatPage";
 import socket from "../socket";
 import { messageURI } from "../../mainApi";
-import { FiMessageSquare, FiPhoneIncoming, FiX } from "react-icons/fi";
+import {
+  FiMessageSquare,
+  FiPhoneIncoming,
+  FiX,
+} from "react-icons/fi";
 
 const getId = (value) => value?._id || value?.id || value?.toString?.() || value;
 
@@ -12,8 +16,14 @@ const FloatingChat = ({ user }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingCall, setPendingCall] = useState(null);
   const [callPopup, setCallPopup] = useState(null);
+  const [panelHeightPx, setPanelHeightPx] = useState(500);
   const isOpenRef = useRef(false);
   const popupTimeoutRef = useRef(null);
+  const resizeRef = useRef({
+    active: false,
+    startClientY: 0,
+    startHeight: 0,
+  });
 
   const playBeep = () => {
     try {
@@ -128,33 +138,77 @@ const FloatingChat = ({ user }) => {
     setUnreadCount(0);
   };
 
+  const clampHeight = (nextHeight) => {
+    const viewportH =
+      typeof window !== "undefined" ? window.innerHeight || 0 : 0;
+    const maxHeight = Math.max(260, Math.floor(viewportH * 0.8));
+    const minHeight = 260;
+    return Math.min(Math.max(nextHeight, minHeight), maxHeight);
+  };
+
+  const startResize = (e) => {
+    resizeRef.current.active = true;
+    resizeRef.current.startClientY = e.clientY;
+    resizeRef.current.startHeight = panelHeightPx;
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  };
+
+  const onResizeMove = (e) => {
+    if (!resizeRef.current.active) return;
+    const deltaY = e.clientY - resizeRef.current.startClientY;
+    const nextHeight = resizeRef.current.startHeight - deltaY;
+    setPanelHeightPx(clampHeight(nextHeight));
+  };
+
+  const endResize = () => {
+    resizeRef.current.active = false;
+  };
+
   if (!user) return null;
 
   return (
     /* Added pointer-events-none to the wrapper so it doesn't block background clicks */
     <div className="fixed bottom-5 right-5 z-9999 flex flex-col items-end pointer-events-none">
-      
+       
       {/* Chat Window Container */}
       {isOpen && (
         <div 
-          className="mb-4 w-87.5 sm:w-95 h-125 max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden pointer-events-auto animate-in slide-in-from-bottom-5 duration-300"
+          className="mb-4 w-87.5 sm:w-95 max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden pointer-events-auto animate-in slide-in-from-bottom-5 duration-300"
+          style={{ height: `${panelHeightPx}px` }}
         >
+          {/* Resize handle (drag up/down to change height) */}
+          <div
+            className="h-3 bg-indigo-600 flex items-center justify-center cursor-ns-resize select-none shrink-0"
+            onPointerDown={startResize}
+            onPointerMove={onResizeMove}
+            onPointerUp={endResize}
+            onPointerCancel={endResize}
+            title="Drag to resize"
+            aria-label="Drag to resize chat"
+          >
+            <div className="h-1 w-12 rounded-full bg-white/70" />
+          </div>
           {/* Header - Fixed Height, Removed Resize Button */}
          <div className="bg-indigo-600 px-4 py-3 text-white flex justify-between items-center shrink-0">
-  <div className="flex items-center gap-2">
-    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+   <div className="flex items-center gap-2">
+     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
     <span className="font-bold text-sm tracking-wide">
   {user.userName || user.name || user.username || "User"} •{" "}
   {user.designation || user.role}
 </span>
 
   </div>
-  <button 
-    onClick={() => setIsOpen(false)} 
-    className="hover:bg-white/20 p-1.5 rounded-lg transition-colors"
-  >
-    <FiX size={20} />
-  </button>
+  <div className="flex items-center gap-1">
+    <button 
+      type="button"
+      onClick={() => setIsOpen(false)} 
+      className="hover:bg-white/20 p-1.5 rounded-lg transition-colors"
+      title="Close"
+      aria-label="Close chat"
+    >
+      <FiX size={20} />
+    </button>
+  </div>
 </div>
 
           

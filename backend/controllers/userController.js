@@ -35,12 +35,19 @@ const register = async (req, res) => {
     } else if (loggedInRole === "Manager") {
       roleToAssign = "Employee";
       managerId = loggedInUserId;
-} else {
+    } else {
       return res.status(403).json({ message: "Not allowed" });
     }
-    const existing = await User.findOne({ email });
-    if (existing)
-      return res.status(409).json({ message: "User already exists" });
+    const [emailExisting, userNameExisting] = await Promise.all([
+      User.findOne({ email }),
+      User.findOne({ userName }),
+    ]);
+    if (emailExisting) {
+      return res.status(409).json({ message: "Email already exists" });
+    }
+    if (userNameExisting) {
+      return res.status(409).json({ message: "Username already exists" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -63,7 +70,21 @@ const register = async (req, res) => {
       data: safeUser,
     });
   } catch (error) {
-res.status(500).json({ message: "Server error" });  }
+    console.error("Register error:", error);
+    const isProduction = process.env.ENVI === "production";
+    if (error?.code === 11000) {
+      const dupField = Object.keys(error?.keyValue ?? {})[0] || "field";
+      const dupValue = error?.keyValue?.[dupField];
+      return res.status(409).json({
+        message: `${dupField} already exists`,
+        ...(isProduction ? {} : { field: dupField, value: dupValue }),
+      });
+    }
+    return res.status(500).json({
+      message: "Server error",
+      ...(isProduction ? {} : { error: error?.message || String(error) }),
+    });
+  }
 };
 
 const seedHr = async (req, res) => {

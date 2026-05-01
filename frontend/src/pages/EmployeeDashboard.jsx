@@ -171,7 +171,7 @@ const EmployeeDashboardPage = () => {
           </button>
         </div>
 
-        {/* User Mini Profile */}
+     
         {/* User Mini Profile */}
         <div className="px-6 py-8">
           <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-100">
@@ -197,7 +197,7 @@ const EmployeeDashboardPage = () => {
               </h3>
               <p className="text-[10px] text-gray-800 font-bold truncate">
                 {profile?.department || "Staff"}
-              </p>c
+              </p>
             </div>
           </div>
         </div>
@@ -267,7 +267,7 @@ const EmployeeDashboardPage = () => {
                     ? "Overview"
                     : activeTab.replace("-", " ")}
                 </h1>
-                <p className="text-[12px] sm:text-[14px] text-gray-400 font-bold hidden sm:block mt-0.5">
+                <p className="text-[12px] sm:text-[14px] text-gray-400 font-bold hidden sm:block mt-2">
                   Welcome back,{" "}
                   <span className="text-blue-600">
                     {profile?.userName?.split(" ")[0] || "Employee"}
