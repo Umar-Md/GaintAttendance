@@ -72,7 +72,7 @@ const Login = () => {
             className="h-12 w-36 mx-auto mb-6 object-contain"
           />
 
-          <h2 className="text-2xl font-black text-center text-gray-800 mb-6">
+          <h2 className="text-2xl font-black text-center text-gray-800 mb-6 font-sans">
             Gaint Attendance System Login
           </h2>
 
