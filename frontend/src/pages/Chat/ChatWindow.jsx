@@ -172,12 +172,26 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
   };
 
   const takePhoto = () => {
+    if (!videoRef.current) return;
     const canvas = document.createElement("canvas");
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    canvas.getContext("2d").drawImage(videoRef.current, 0, 0);
-    
+
+    const videoW = videoRef.current.videoWidth;
+    const videoH = videoRef.current.videoHeight;
+    const size = Math.min(videoW, videoH);
+
+    // Center-crop to a square (matches the square UI preview)
+    const sx = Math.floor((videoW - size) / 2);
+    const sy = Math.floor((videoH - size) / 2);
+
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(videoRef.current, sx, sy, size, size, 0, 0, size, size);
+     
     canvas.toBlob((blob) => {
+      if (!blob) return;
       const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
       handleFileUpload(file);
       stopCamera();
@@ -248,7 +262,14 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
       {/* CAMERA UI */}
       {showCamera && (
         <div className="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center">
-          <video ref={videoRef} autoPlay playsInline className="w-full h-auto max-h-[70%]" />
+          <div className="w-[min(90vw,420px)] aspect-square overflow-hidden rounded-2xl bg-slate-950">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          </div>
           <div className="flex gap-4 mt-4">
             <button onClick={stopCamera} className="p-4 bg-red-500 text-white rounded-full"><FiX size={24}/></button>
             <button onClick={takePhoto} className="p-4 bg-green-500 text-white rounded-full"><FiCamera size={30}/></button>

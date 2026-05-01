@@ -100,7 +100,7 @@ const EmployeeAttendance = () => {
               <button onClick={() => setShowCamera(false)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
             </div>
 
-            <div className="relative rounded-4xl overflow-hidden bg-slate-900 aspect-video mb-8 ring-4 ring-slate-50 shadow-inner">
+            <div className="relative mx-auto w-[min(90vw,420px)] rounded-4xl overflow-hidden bg-slate-900 aspect-square mb-8 ring-4 ring-slate-50 shadow-inner">
               <Webcam
                 ref={webcamRef}
                 audio={false}
