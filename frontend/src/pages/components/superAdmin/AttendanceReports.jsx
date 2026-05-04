@@ -232,7 +232,7 @@ const AttendanceReports = () => {
 
       <div className="overflow-hidden rounded-lg border border-slate-100 bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[920px] text-left">
+          <table className="w-full min-w-230 text-left">
             <thead className="bg-slate-50 text-xs tracking-wide text-slate-500">
               <tr>
                 <th className="px-5 py-4">Person</th>

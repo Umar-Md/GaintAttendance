@@ -18,6 +18,7 @@ import SuperAdminProfile from "./SuperAdminProfile";
 import SettingsPage from "./Settings";
 import AttendanceReports from "./AttendanceReports";
 import FloatingChat from "../FloatingChat";
+import logo from "../../../assets/Gaint_logo.png";
 
 import { superAdminURI, userURI } from "../../../mainApi";
 
@@ -97,7 +98,7 @@ const SuperAdminDashboard = () => {
           {/* <h1 className="text-2xl font-black text-blue-600">
             Admin Portal
           </h1> */}
-          <img src="/src/assets/Gaint_logo.png" alt="Gaint Logo" className="w-32 h-7"/>
+          <img src={logo} alt="Gaint Logo" className="w-32 h-7"/>
           <button onClick={closeSidebar} className="lg:hidden p-1 text-gray-500">
             <X size={24} />
           </button>
