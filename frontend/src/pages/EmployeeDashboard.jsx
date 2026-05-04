@@ -301,7 +301,7 @@ const EmployeeDashboardPage = () => {
                 strokeWidth={activeTab === item.key ? 2.5 : 2}
               />
               <span
-                className={`text-[9px] font-black uppercase ${activeTab === item.key ? "opacity-100" : "opacity-0"}`}
+                className={`text-[9px] font-black  ${activeTab === item.key ? "opacity-100" : "opacity-0"}`}
               >
                 {item.key.slice(0, 4)}
               </span>

@@ -136,7 +136,7 @@ const TeamLeaves = () => {
       </div>
       
       <div>
-        <p className="text-[9px] sm:text-[14px] font-black text-slate-600 uppercase tracking-wider leading-none mb-1">
+        <p className="text-[9px] sm:text-[14px] font-black text-slate-600  tracking-wider leading-none mb-1">
           {stat.label}
         </p>
         <p 
@@ -417,7 +417,7 @@ const ActionButtons = ({ status, leave, onOpenModal, isFullWidth }) => {
 const LoadingState = () => (
   <div className="flex flex-col justify-center items-center h-80 bg-white rounded-[2.5rem] border border-slate-100">
     <div className="w-10 h-10 rounded-full border-4 border-slate-100 border-t-indigo-500 animate-spin"></div>
-    <p className="mt-4 text-slate-400 font-black text-[10px] tracking-widest uppercase">
+    <p className="mt-4 text-slate-400 font-black text-[10px] tracking-widest">
       Syncing Records...
     </p>
   </div>

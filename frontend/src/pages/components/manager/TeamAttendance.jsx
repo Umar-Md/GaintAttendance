@@ -173,14 +173,14 @@ const TeamAttendance = () => {
                           <p className="font-bold text-sm text-slate-700">
                             {record.employeeId?.userName}
                           </p>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase">
+                          <p className="text-[10px] font-bold text-slate-400 ">
                             {record.employeeId?.email}
                           </p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-black  ${
                             record.status === 'present' ? 'bg-emerald-50 text-emerald-600' : 
                             record.status === 'absent' ? 'bg-rose-50 text-rose-600' : 'bg-slate-100 text-slate-400'
                         }`}>
@@ -233,10 +233,10 @@ const TeamAttendance = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 py-2 border-y border-dashed">
-                  <div className="text-[10px] uppercase font-bold text-slate-400">
+                  <div className="text-[10px]  font-bold text-slate-400">
                     Status: <span className="text-slate-700 block text-xs">{record.status || "Unmarked"}</span>
                   </div>
-                  <div className="text-[10px] uppercase font-bold text-slate-400">
+                  <div className="text-[10px]  font-bold text-slate-400">
                     Check In: <span className="text-slate-700 block text-xs">{formatTime(record.startTime)}</span>
                   </div>
                 </div>

@@ -73,7 +73,7 @@ const Leaves = () => {
         <h2 className="text-2xl md:text-3xl font-black text-slate-900">
           Leave Administration
         </h2>
-        <p className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-wider">
+        <p className="text-[10px] font-black text-slate-400 mt-1  tracking-wider">
           Personnel Absence Management System
         </p>
       </div>

@@ -79,7 +79,7 @@ const ResetPassword = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs font-black text-gray-400 uppercase ml-1">Email Address</label>
+            <label className="text-xs font-black text-gray-400  ml-1">Email Address</label>
             <input
               type="email"
               name="email"
@@ -92,7 +92,7 @@ const ResetPassword = () => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-black text-gray-400 uppercase ml-1">Verification OTP</label>
+            <label className="text-xs font-black text-gray-400  ml-1">Verification OTP</label>
             <input
               type="text"
               name="otp"
@@ -105,7 +105,7 @@ const ResetPassword = () => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-black text-gray-400 uppercase ml-1">New Password</label>
+            <label className="text-xs font-black text-gray-400  ml-1">New Password</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
@@ -128,7 +128,7 @@ const ResetPassword = () => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-black text-gray-400 uppercase ml-1">Confirm New Password</label>
+            <label className="text-xs font-black text-gray-400  ml-1">Confirm New Password</label>
             <div className="relative">
               <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input

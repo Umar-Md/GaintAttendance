@@ -128,7 +128,7 @@ const EmployeeProfile = () => {
           </div>
 
           <div className="mt-10 group">
-            <label className="text-sm font-black text-slate-400 mb-3 block uppercase tracking-wider">Professional Narrative</label>
+            <label className="text-sm font-black text-slate-400 mb-3 block  tracking-wider">Professional Narrative</label>
             {isEditing ? (
               <textarea 
                 className="w-full border-2 border-slate-100 bg-slate-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-slate-700 text-base sm:text-lg" 
@@ -152,7 +152,7 @@ const EmployeeProfile = () => {
 /* Reusable Components */
 const Field = ({ icon, label, editable, value, onChange }) => (
   <div className="space-y-2">
-    <label className="flex items-center gap-2 text-xs sm:text-sm font-black text-slate-400 ml-1 uppercase tracking-wide">
+    <label className="flex items-center gap-2 text-xs sm:text-sm font-black text-slate-400 ml-1  tracking-wide">
       {icon} <span>{label}</span>
     </label>
     {editable ? (
@@ -171,7 +171,7 @@ const Field = ({ icon, label, editable, value, onChange }) => (
 
 const StaticField = ({ icon, label, value }) => (
   <div className="space-y-2">
-    <label className="flex items-center gap-2 text-xs sm:text-sm font-black text-slate-400 ml-1 uppercase tracking-wide">
+    <label className="flex items-center gap-2 text-xs sm:text-sm font-black text-slate-400 ml-1  tracking-wide">
       {icon} <span>{label}</span>
     </label>
     <div className="bg-slate-100/50 border border-slate-200/50 p-4 rounded-xl text-slate-500 font-bold text-base sm:text-lg truncate">

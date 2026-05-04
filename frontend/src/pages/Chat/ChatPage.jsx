@@ -448,7 +448,7 @@ const ChatPage = ({
                 <h3 className="font-bold text-slate-800 text-[14px] leading-tight">
                   {selectedUser.userName}
                 </h3>
-                <p className="text-[12px] text-slate-400 font-bold uppercase">
+                <p className="text-[12px] text-slate-400 font-bold ">
                   {selectedUser.role || "Team Member"}
                 </p>
               </div>
@@ -550,7 +550,7 @@ const ChatPage = ({
                   />
                   <div className="min-w-0">
                     <p className="font-bold text-sm text-slate-800 truncate">{member.userName}</p>
-                    <p className="text-xs text-slate-400 uppercase">{member.role}</p>
+                    <p className="text-xs text-slate-400 ">{member.role}</p>
                   </div>
                 </label>
               ))}

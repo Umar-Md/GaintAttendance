@@ -141,7 +141,7 @@ const Dashboard = ({ managers = [], attendance = [], leaves = [] }) => {
                 >
                   <td className="py-5 px-8">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black uppercase">
+                      <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black ">
                         {record.name?.charAt(0) || "U"}
                       </div>
                       <span className="font-bold text-slate-700">
@@ -156,7 +156,7 @@ const Dashboard = ({ managers = [], attendance = [], leaves = [] }) => {
 
                   <td className="py-5 px-8">
                     <span
-                      className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase block w-fit mx-auto ${
+                      className={`px-3 py-1 rounded-lg text-[10px] font-black  block w-fit mx-auto ${
                         record.status === "Present"
                           ? "bg-emerald-100 text-emerald-700"
                           : record.status === "Incomplete"

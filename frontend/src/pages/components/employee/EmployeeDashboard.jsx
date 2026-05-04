@@ -76,11 +76,11 @@ const EmployeeDashboard = ({
                 <h3 className="text-xl font-black text-slate-800 mb-2">Daily Attendance</h3>
                 <div className="flex gap-4 mt-2">
                   <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase">In Time</p>
+                    <p className="text-[10px] font-bold text-slate-400 ">In Time</p>
                     <p className="font-bold text-slate-700">{formatToTime(todayAttendance?.startTime)}</p>
                   </div>
                   <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase">Out Time</p>
+                    <p className="text-[10px] font-bold text-slate-400 ">Out Time</p>
                     <p className="font-bold text-slate-700">{formatToTime(todayAttendance?.endTime)}</p>
                   </div>
                 </div>
