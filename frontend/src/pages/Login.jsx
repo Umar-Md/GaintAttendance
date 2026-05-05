@@ -73,7 +73,7 @@ const Login = () => {
           />
 
           <h2 className="text-2xl font-black text-center text-gray-800 mb-6 font-sans">
-            Gaint Attendance System Login
+            GAINT Attendance System Login
           </h2>
 
           <form className="space-y-6" onSubmit={handleLogin}>
