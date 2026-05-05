@@ -43,7 +43,7 @@ const SubmitWorkModal = ({ task, close, reload }) => {
 
       reload();
       close();
-    } catch (err) {
+    } catch {
       alert("Failed to submit work");
     } finally {
       setLoading(false);

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Sidebar from "./Sidebar";
@@ -40,6 +41,7 @@ const ChatPage = ({
   const [groupUsers, setGroupUsers] = useState([]);
   const [selectedGroupMemberIds, setSelectedGroupMemberIds] = useState([]);
   const [groupCallType, setGroupCallType] = useState("audio");
+  const [peerCount, setPeerCount] = useState(0);
 
   const peerConnectionRef = useRef(null);
   const peerConnectionsRef = useRef({});
@@ -93,6 +95,7 @@ const ChatPage = ({
     localStreamRef.current = null;
     remoteStreamRef.current = null;
     currentPeerIdsRef.current = [];
+    setPeerCount(0);
 
     setLocalStream(null);
     setRemoteStream(null);
@@ -119,6 +122,7 @@ const ChatPage = ({
     peerConnectionRef.current = pc;
     peerConnectionsRef.current[peerId] = pc;
     currentPeerIdsRef.current = Array.from(new Set([...currentPeerIdsRef.current, peerId]));
+    setPeerCount(currentPeerIdsRef.current.length);
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
@@ -153,6 +157,7 @@ const ChatPage = ({
     peerConnectionsRef.current[peerId]?.close();
     delete peerConnectionsRef.current[peerId];
     currentPeerIdsRef.current = currentPeerIdsRef.current.filter((id) => id !== peerId);
+    setPeerCount(currentPeerIdsRef.current.length);
     setRemoteStreams((prev) => prev.filter((item) => item.peerId !== peerId));
 
     if (currentPeerIdsRef.current.length === 0 && callStatusRef.current !== "incoming") {
@@ -408,7 +413,7 @@ const ChatPage = ({
 
   const callPartner = incomingCall?.from || selectedUser;
   const isCallVisible = callStatus !== "idle";
-  const isGroupCall = remoteStreams.length > 1 || currentPeerIdsRef.current.length > 1 || incomingCall?.participants?.length > 2;
+  const isGroupCall = remoteStreams.length > 1 || peerCount > 1 || incomingCall?.participants?.length > 2;
 
   return (
     <div className="flex h-full w-full bg-white overflow-hidden relative">
@@ -578,7 +583,7 @@ const ChatPage = ({
                   ? `Incoming ${incomingCall?.participants?.length > 2 ? "group " : ""}${callType} call`
                   : callStatus === "calling"
                     ? isGroupCall
-                      ? `Calling ${currentPeerIdsRef.current.length} members`
+                      ? `Calling ${peerCount} members`
                       : `Calling ${callPartner?.userName || "user"}`
                     : `${isGroupCall ? "Group " : ""}${callType === "video" ? "Video" : "Audio"} call`}
               </p>

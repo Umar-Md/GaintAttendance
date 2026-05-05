@@ -57,7 +57,9 @@ const ProjectTaskBoard = ({ project, back }) => {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadSprints(); }, [project]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadTasks(); }, [activeSprintId]);
 
   const todo = tasks.filter((t) => t.status === "TODO");

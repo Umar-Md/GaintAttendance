@@ -1,9 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Download, Calendar, Clock, UserCheck, ArrowRight, ChevronDown } from "lucide-react";
 
 const Attendance = ({ attendance, selectedDate, setSelectedDate }) => {
-  const [isExporting, setIsExporting] = useState(false);
-
   // --- NEW EXPORT LOGIC ---
   const downloadCSV = (data, filename) => {
     if (data.length === 0) return alert("No data to export");

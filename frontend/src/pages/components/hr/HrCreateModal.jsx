@@ -41,7 +41,7 @@ const CreateProjectModal = ({ close, reload }) => {
 
       reload();
       close();
-    } catch (err) {
+    } catch {
       alert("Failed to create project");
     } finally {
       setLoading(false);

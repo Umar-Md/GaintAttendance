@@ -310,7 +310,7 @@ const Metric = ({ title, value, icon: Icon }) => (
   <div className="rounded-lg border border-slate-100 bg-white p-4 shadow-sm">
     <div className="flex items-center justify-between">
       <p className="text-sm font-semibold text-slate-500">{title}</p>
-      <Icon className="h-4 w-4 text-blue-600" />
+      {Icon ? React.createElement(Icon, { className: "h-4 w-4 text-blue-600" }) : null}
     </div>
     <p className="mt-2 text-2xl font-black text-slate-900">{value}</p>
   </div>

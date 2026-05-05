@@ -283,7 +283,7 @@
 import React, { useState } from "react";
 import { Calendar, Clock, XCircle, CheckCircle, Plus, Info, Trash2 } from "lucide-react";
 import axios from "axios";
-import { employeeURI, userURI } from "../../../mainApi";
+import { employeeURI } from "../../../mainApi";
 
 const EmployeeLeaves = ({ leaves, fetchDashboardData }) => {
   const [showForm, setShowForm] = useState(false);
@@ -337,7 +337,7 @@ const EmployeeLeaves = ({ leaves, fetchDashboardData }) => {
         });
         fetchDashboardData();
         alert("Leave cancelled successfully");
-      } catch (err) {
+      } catch {
         alert("Failed to cancel leave");
       }
     }

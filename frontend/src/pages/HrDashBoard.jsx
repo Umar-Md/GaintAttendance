@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   User,
   Users,
@@ -19,7 +19,7 @@ import ManageManagers from "./components/hr/ManageManagers";
 import Attendance from "./components/hr/Attendance";
 import Leaves from "./components/hr/Leaves";
 import SettingsPage from "./components/hr/Settings";
-import { mockManagers, mockAttendance, mockLeaves } from "../utils/data";
+import { mockManagers, mockLeaves } from "../utils/data";
 import axios from "axios";
 import { hrURI, userURI } from "../mainApi";
 import { useNavigate } from "react-router-dom";
@@ -30,7 +30,7 @@ const HRDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [managers, setManagers] = useState(mockManagers);
   const [attendance, setAttendance] = useState([]);
-  const [leaves, setLeaves] = useState(mockLeaves);
+  const [leaves, _setLeaves] = useState(mockLeaves);
   const [searchTerm, setSearchTerm] = useState("");
   const [profile, setProfile] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -41,17 +41,17 @@ const HRDashboard = () => {
     new Date().toISOString().split("T")[0]
   );
 
-  const formatTime = (dateString) => {
+  const formatTime = useCallback((dateString) => {
     if (!dateString) return "--:--";
     return new Date(dateString).toLocaleTimeString("en-IN", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: true,
     });
-  };
+  }, []);
 
   /* --- DATA FETCHING --- */
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const res = await axios.get(`${hrURI}/getprofile`, {
         withCredentials: true,
@@ -60,9 +60,9 @@ const HRDashboard = () => {
     } catch (err) {
       console.error("HR profile fetch error", err);
     }
-  };
+  }, []);
 
-  const fetchManagers = async () => {
+  const fetchManagers = useCallback(async () => {
     try {
       const res = await axios.get(`${hrURI}/getManagers`, {
         withCredentials: true,
@@ -82,9 +82,9 @@ const HRDashboard = () => {
     } catch (error) {
       console.error("Error fetching managers", error);
     }
-  };
+  }, []);
 
-  const fetchAttendance = async () => {
+  const fetchAttendance = useCallback(async () => {
     try {
       const res = await axios.get(`${hrURI}/manager-attendance`, {
         withCredentials: true,
@@ -102,13 +102,13 @@ const HRDashboard = () => {
     } catch (err) {
       console.error("Attendance fetch error", err);
     }
-  };
+  }, [formatTime]);
 
   useEffect(() => {
     fetchProfile();
     fetchManagers();
     fetchAttendance();
-  }, []);
+  }, [fetchAttendance, fetchManagers, fetchProfile]);
 
   /* --- MANAGER STATUS HANDLERS --- */
   const handleActivateManager = async (id) => {

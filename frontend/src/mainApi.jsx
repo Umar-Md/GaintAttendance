@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 const localBackendURI = "http://localhost:7000";
 const isLocalHost =
   typeof window !== "undefined" &&

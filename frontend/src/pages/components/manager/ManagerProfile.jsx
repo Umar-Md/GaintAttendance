@@ -102,7 +102,7 @@ const ManagerProfile = () => {
       );
 
       fetchProfile();
-    } catch (err) {
+    } catch {
       alert("Image update failed");
     } finally {
       setLoadingImage(false);

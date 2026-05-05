@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { superAdminURI } from "../../../mainApi";
-import Chatbot from "../../Chatbot";
 
 /* STATUS BADGE */
 const StatusBadge = ({ active }) => (
@@ -123,16 +122,12 @@ const Table = ({ title, data, columns }) => (
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
     axios
       .get(`${superAdminURI}/stats`, { withCredentials: true })
       .then((res) => setStats(res.data))
       .catch(err => console.error("Error fetching stats:", err));
-
-    const u = JSON.parse(localStorage.getItem("user"));
-    setUser(u);
   }, []);
 
   if (!stats) {

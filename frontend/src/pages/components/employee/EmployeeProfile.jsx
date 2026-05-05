@@ -38,7 +38,7 @@ const EmployeeProfile = () => {
       await axios.put(`${employeeURI}/update-profile`, formData, { withCredentials: true });
       setIsEditing(false);
       fetchProfile();
-    } catch (err) { alert("Failed to update profile"); }
+    } catch { alert("Failed to update profile"); }
   };
 
   const handleImageChange = async (e) => {
@@ -52,7 +52,7 @@ const EmployeeProfile = () => {
       const cloudRes = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, data);
       await axios.patch(`${userURI}/update-image`, { imageUrl: cloudRes.data.secure_url }, { withCredentials: true });
       fetchProfile();
-    } catch (err) { alert("Image update failed"); }
+    } catch { alert("Image update failed"); }
     finally { setLoadingImage(false); }
   };
 

@@ -2,7 +2,7 @@ import React from "react";
 import { Users, CheckCircle, CalendarDays } from "lucide-react";
 import Chatbot from "../../Chatbot";
 
-const ManagerDashboard = ({ user, attendance = [], leaves = [], team = [] }) => {
+const ManagerDashboard = ({ user, attendance = [], team = [] }) => {
   const formatTime = (time) =>
     time
       ? new Date(time).toLocaleTimeString([], {

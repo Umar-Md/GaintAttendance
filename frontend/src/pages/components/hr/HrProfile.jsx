@@ -67,7 +67,7 @@ const HRProfile = () => {
       setIsEditing(false);
       fetchProfile();
       alert("Profile updated successfully");
-    } catch (err) {
+    } catch {
       alert("Failed to update profile");
     }
   };
@@ -97,7 +97,7 @@ const HRProfile = () => {
       );
 
       fetchProfile();
-    } catch (err) {
+    } catch {
       alert("Image update failed");
     } finally {
       setLoadingImage(false);

@@ -165,7 +165,7 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       setCameraStream(stream);
       if (videoRef.current) videoRef.current.srcObject = stream;
-    } catch (err) {
+    } catch {
       alert("Camera access denied.");
       setShowCamera(false);
     }

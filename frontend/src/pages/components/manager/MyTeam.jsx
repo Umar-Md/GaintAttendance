@@ -72,7 +72,7 @@ const MyTeam = ({ team, searchTerm, setSearchTerm, fetchTeam }) => {
         { withCredentials: true }
       );
       fetchTeam();
-    } catch (error) {
+    } catch {
       alert("Failed to deactivate employee");
     }
   };
@@ -85,7 +85,7 @@ const MyTeam = ({ team, searchTerm, setSearchTerm, fetchTeam }) => {
         { withCredentials: true }
       );
       fetchTeam();
-    } catch (error) {
+    } catch {
       alert("Failed to activate employee");
     }
   };

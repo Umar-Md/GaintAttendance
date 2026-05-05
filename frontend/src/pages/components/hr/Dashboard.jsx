@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Users,
   CheckCircle,
@@ -11,15 +11,6 @@ import Chatbot from "../../Chatbot";
 
 const Dashboard = ({ managers = [], attendance = [], leaves = [] }) => {
   const [showAllHistory, setShowAllHistory] = useState(false);
-  const [user, setUser] = useState(null);
-
-  // --- 1. Fetch User Data ---
-  useEffect(() => {
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-    if (savedUser) {
-      setUser(savedUser);
-    }
-  }, []);
 
   // --- LOGIC ---
   const activeManagersCount = managers?.filter((m) => m.status === "active").length || 0;

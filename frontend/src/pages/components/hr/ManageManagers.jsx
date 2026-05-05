@@ -14,7 +14,7 @@ import {
   Users,
   Trash2,
 } from "lucide-react";
-import { hrURI, userURI } from "../../../mainApi";
+import { userURI } from "../../../mainApi";
 
 const ManageManagers = ({
   managers,
