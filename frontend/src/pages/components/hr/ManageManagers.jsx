@@ -60,7 +60,17 @@ const handleEditManager = (manager) => {
   );
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name === "phoneNumber") {
+      const digitsOnly = String(value || "")
+        .replace(/\D/g, "")
+        .slice(0, 10);
+      setFormData({ ...formData, [name]: digitsOnly });
+      return;
+    }
+
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleAddManager = async (e) => {
@@ -342,7 +352,11 @@ const handleEditManager = (manager) => {
                   </label>
                   <input
                     name="phoneNumber"
-                    placeholder="+1 (555) 000"
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    pattern="\\d{10}"
+                    placeholder="10-digit number"
                     value={formData.phoneNumber}
                     onChange={handleChange}
                     className="w-full bg-slate-50 border-2 border-slate-50 px-5 py-3.5 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
