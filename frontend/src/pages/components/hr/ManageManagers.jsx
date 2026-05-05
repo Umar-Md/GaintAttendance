@@ -156,7 +156,7 @@ const handleEditManager = (manager) => {
         {filteredManagers.map((manager) => (
           <div
             key={manager.id}
-            className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8 hover:shadow-2xl hover:shadow-indigo-100 transition-all duration-500 group relative overflow-hidden"
+            className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8 hover:shadow-2xl hover:shadow-indigo-100 transition-all duration-500 group relative overflow-hidden flex flex-col"
           >
             {/* Background Accent */}
             <div
@@ -229,42 +229,45 @@ const handleEditManager = (manager) => {
               </span>
             </div>
 
-            <div className="flex gap-3">
+            <div className="mt-auto flex items-center gap-3">
               {manager.status === "active" ? (
                 <button
                   onClick={() => handleDeactivateManager(manager.id)}
-                  className="flex-1 bg-rose-50 text-rose-600 py-3 rounded-xl flex justify-center items-center gap-2 text-[12px] font-black  hover:bg-rose-600 hover:text-white transition-all shadow-sm"
+                  className="flex-1 h-12 bg-rose-50 text-rose-600 px-4 rounded-xl flex justify-center items-center gap-2 text-[12px] font-black hover:bg-rose-600 hover:text-white transition-all shadow-sm"
                 >
                   <XCircle className="w-4 h-4" /> Deactivate
                 </button>
               ) : (
                 <button
                   onClick={() => handleActivateManager(manager.id)}
-                  className="flex-1 bg-emerald-50 text-emerald-600 py-3 rounded-xl flex justify-center items-center gap-2 text-[12px] font-black  hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                  className="flex-1 h-12 bg-emerald-50 text-emerald-600 px-4 rounded-xl flex justify-center items-center gap-2 text-[12px] font-black hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
                 >
                   <CheckCircle className="w-4 h-4" /> Activate
                 </button>
               )}
-             <button
-  onClick={() => handleViewManager(manager)}
-  className="p-3 border border-slate-100 rounded-xl hover:bg-slate-50 transition-all text-slate-400 hover:text-blue-600 shadow-sm"
->
-  <Eye className="w-4 h-4" />
-</button>
+              <button
+                type="button"
+                onClick={() => handleViewManager(manager)}
+                className="h-12 w-12 flex items-center justify-center border border-slate-100 rounded-xl hover:bg-slate-50 transition-all text-slate-400 hover:text-blue-600 shadow-sm"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
 
-<button
-  onClick={() => handleEditManager(manager)}
-  className="p-3 border border-slate-100 rounded-xl hover:bg-slate-50 transition-all text-slate-400 hover:text-blue-600 shadow-sm"
->
-  <Edit className="w-4 h-4" />
-</button>
+              <button
+                type="button"
+                onClick={() => handleEditManager(manager)}
+                className="h-12 w-12 flex items-center justify-center border border-slate-100 rounded-xl hover:bg-slate-50 transition-all text-slate-400 hover:text-blue-600 shadow-sm"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
 
-<button
-  onClick={() => handleDeleteManager(manager)}
-  className="p-3 border border-red-100 rounded-xl bg-red-50 transition-all text-red-600 hover:bg-red-600 hover:text-white shadow-sm"
->
-  <Trash2 className="w-4 h-4" />
-</button>
+              <button
+                type="button"
+                onClick={() => handleDeleteManager(manager)}
+                className="h-12 w-12 flex items-center justify-center border border-red-100 rounded-xl bg-red-50 transition-all text-red-600 hover:bg-red-600 hover:text-white shadow-sm"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
 
             </div>
           </div>

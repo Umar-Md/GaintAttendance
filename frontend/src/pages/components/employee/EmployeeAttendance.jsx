@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Webcam from "react-webcam";
 import axios from "axios";
-import { Clock, CheckCircle, XCircle, TrendingUp, Camera, CalendarDays, LogIn, LogOut, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, TrendingUp, Camera, CalendarDays, LogIn, LogOut, Loader2 } from "lucide-react";
 import { employeeURI, userURI, CLOUD_NAME, preset } from "../../../mainApi";
 
 const EmployeeAttendance = () => {
@@ -77,7 +77,6 @@ const EmployeeAttendance = () => {
   const stats = {
     present: filteredAttendance.filter((a) => a.status === "Present").length,
     absent: filteredAttendance.filter((a) => a.status === "Absent").length,
-    late: filteredAttendance.filter((a) => a.status === "Late").length,
     hours: filteredAttendance.reduce((sum, a) => sum + (a.totalHours || 0), 0),
   };
 
@@ -171,7 +170,6 @@ const EmployeeAttendance = () => {
         {[
           { label: "Days Present", value: stats.present, icon: CheckCircle, color: "emerald" },
           { label: "Absences", value: stats.absent, icon: XCircle, color: "rose" },
-          { label: "Late Entries", value: stats.late, icon: Clock, color: "amber" },
           { label: "Total Hours", value: `${stats.hours.toFixed(1)}h`, icon: TrendingUp, color: "blue" },
         ].map((stat) => (
           <div key={stat.label} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow group relative overflow-hidden">

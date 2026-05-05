@@ -44,6 +44,16 @@ const EmployeeDashboardPage = () => {
     setIsSidebarOpen(false);
   }, [activeTab]);
 
+  useEffect(() => {
+    if (activeTab !== "dashboard") return;
+
+    const intervalId = setInterval(() => {
+      fetchDashboardData();
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [activeTab]);
+
   const fetchProfile = async () => {
     try {
       const res = await axios.get(`${employeeURI}/profile`, {
@@ -139,7 +149,7 @@ const EmployeeDashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex overflow-x-hidden">
+    <div className="h-dvh bg-white flex overflow-hidden">
       {profile && <FloatingChat user={profile} />}
       {/* MOBILE SIDEBAR OVERLAY */}
       {isSidebarOpen && (
@@ -151,7 +161,7 @@ const EmployeeDashboardPage = () => {
 
       {/* SIDEBAR */}
       <aside
-        className={`fixed lg:sticky left-0 top-0 h-screen w-72 bg-white text-black flex flex-col z-999 border-r border-gray-100 transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} overflow-y-auto`}
+        className={`fixed lg:sticky left-0 top-0 h-dvh w-72 bg-white text-black flex flex-col z-999 border-r border-gray-100 transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} overflow-hidden`}
       >
         {/* Logo Section */}
         <div className="p-8 border-b border-gray-300 flex justify-between items-center">
@@ -203,7 +213,7 @@ const EmployeeDashboardPage = () => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 px-4 space-y-2 overflow-y-auto min-h-0">
           {menuItems.map((item) => (
             <button
               key={item.key}
@@ -235,7 +245,7 @@ const EmployeeDashboardPage = () => {
         </nav>
 
         {/* Logout Section */}
-        <div className="p-6 border-t mt-4 border-gray-400 position-fixed bottom-0">
+        <div className="p-6 border-t mt-4 border-gray-400">
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-5 py-3.5 w-full bg-red-600 hover:bg-red-500 text-white hover:text-white rounded-xl transition-all group font-bold text-sm"
@@ -250,7 +260,7 @@ const EmployeeDashboardPage = () => {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#fcfcfc]">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-[#fcfcfc]">
         {/* HEADER */}
         <header className="sticky top-0 z-40 bg-white/70 backdrop-blur-md border-b border-gray-300 px-4 sm:px-10 py-5 sm:py-7">
           <div className="flex justify-between items-center max-w-7xl mx-auto w-full">
@@ -278,7 +288,7 @@ const EmployeeDashboardPage = () => {
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-10 max-w-7xl mx-auto w-full pb-24 lg:pb-8 overflow-x-hidden">
+        <main className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-10 max-w-7xl mx-auto w-full pb-24 lg:pb-8 overflow-x-hidden">
           <div className="animate-in fade-in slide-in-from-bottom-3 duration-700">
             {renderContent()}
           </div>

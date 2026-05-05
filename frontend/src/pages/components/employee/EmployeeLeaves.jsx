@@ -345,9 +345,9 @@ const EmployeeLeaves = ({ leaves, fetchDashboardData }) => {
 
   const leaveStats = {
     total: leaves.length,
-    approved: leaves.filter((l) => l.status === "APPROVED").length,
-    pending: leaves.filter((l) => l.status === "PENDING").length,
-    rejected: leaves.filter((l) => l.status === "REJECTED").length,
+    approved: leaves.filter((l) => String(l.status || "").trim().toUpperCase() === "APPROVED").length,
+    pending: leaves.filter((l) => String(l.status || "").trim().toUpperCase() === "PENDING").length,
+    rejected: leaves.filter((l) => String(l.status || "").trim().toUpperCase() === "REJECTED").length,
   };
 
   return (

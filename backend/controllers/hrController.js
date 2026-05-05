@@ -172,6 +172,27 @@ const addPublicHoliday = async (req, res) => {
 res.status(500).json({ message: "Internal server error" });  }
 };
 
+const deleteHoliday = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const holiday = await Holiday.findById(id);
+    if (!holiday) {
+      return res.status(404).json({ message: "Holiday not found" });
+    }
+
+    if (String(holiday.createdBy) !== String(req.userId)) {
+      return res.status(403).json({ message: "Not allowed to delete this holiday" });
+    }
+
+    await Holiday.deleteOne({ _id: id });
+    return res.status(200).json({ message: "Holiday removed successfully" });
+  } catch (error) {
+    console.error("Delete holiday error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const viewAttendance = async (req, res) => {
   try {
     const { date, employeeId, managerId, department } = req.query;
@@ -493,6 +514,7 @@ const getAllHolidays = async (req, res) => {
     const holidays = await Holiday.find({
       year: currentYear,
       date: { $gte: today },
+      name: { $not: /^Company Holiday - /i },
     }).sort({ date: 1 }); // nearest first
 
     res.json({ data: holidays });
@@ -511,6 +533,7 @@ export {
   activateManager,
   permanentlyDeleteManager,
   addPublicHoliday,
+  deleteHoliday,
   viewAttendance,
   getManagersAttendanceForHR,
   getTeamLeaves,

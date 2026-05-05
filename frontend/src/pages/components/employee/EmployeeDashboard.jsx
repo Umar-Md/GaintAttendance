@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   CheckCircle,
   Clock,
@@ -6,24 +6,20 @@ import {
   TrendingUp,
   ArrowRight,
 } from "lucide-react";
-import axios from "axios";
-import { employeeURI, userURI } from "../../../mainApi";
-import Chatbot from "../../Chatbot";
 
 const EmployeeDashboard = ({
   attendance = [],
   leaves = [],
   holidays = [],
-  fetchDashboardData,
 }) => {
-  const [user, setUser] = useState(null);
+  const normalizeStatus = (status) =>
+    String(status || "")
+      .trim()
+      .toUpperCase();
 
-  useEffect(() => {
-    const savedUser = JSON.parse(localStorage.getItem("user"));
-    if (savedUser) {
-      setUser(savedUser);
-    }
-  }, []);
+  const pendingLeavesCount = Array.isArray(leaves)
+    ? leaves.filter((l) => normalizeStatus(l?.status) === "PENDING").length
+    : 0;
 
   const formatToTime = (timeStr) => {
     if (!timeStr || timeStr === "--:--") return "--:--";
@@ -47,10 +43,10 @@ const EmployeeDashboard = ({
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Total Working Days", value: attendance.filter((a) => a.status === "Present").length, icon: TrendingUp, accent: "bg-red-500", iconBg: "bg-red-100", iconColor: "text-red-600" },
-          { label: "Leaves Taken", value: leaves.filter((l) => l.status === "APPROVED").length, icon: Calendar, accent: "bg-blue-600", iconBg: "bg-blue-100", iconColor: "text-blue-600" },
-          { label: "Pending Leaves", value: leaves.filter((l) => l.status === "PENDING").length, icon: Clock, accent: "bg-yellow-400", iconBg: "bg-yellow-100", iconColor: "text-yellow-600" },
-          { label: "Upcoming Holidays", value: holidays.filter((h) => new Date(h.date) > new Date()).length, icon: CheckCircle, accent: "bg-green-500", iconBg: "bg-green-100", iconColor: "text-green-600" }
+          { label: "Total Working Days", value: attendance.filter((a) => normalizeStatus(a.status) === "PRESENT").length, icon: TrendingUp, accent: "bg-red-500", iconBg: "bg-red-100", iconColor: "text-red-600" },
+          { label: "Leaves Taken", value: (Array.isArray(leaves) ? leaves : []).filter((l) => normalizeStatus(l?.status) === "APPROVED").length, icon: Calendar, accent: "bg-blue-600", iconBg: "bg-blue-100", iconColor: "text-blue-600" },
+          { label: "Pending Leaves", value: pendingLeavesCount, icon: Clock, accent: "bg-yellow-400", iconBg: "bg-yellow-100", iconColor: "text-yellow-600" },
+          { label: "Upcoming Holidays", value: (Array.isArray(holidays) ? holidays : []).filter((h) => new Date(h.date) > new Date()).length, icon: CheckCircle, accent: "bg-green-500", iconBg: "bg-green-100", iconColor: "text-green-600" }
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group">
             <div className={`absolute top-0 left-0 w-1.5 h-full ${stat.accent}`}></div>
@@ -141,7 +137,7 @@ const EmployeeDashboard = ({
                   ))}
                 </tbody>
               </table>
-            </div>
+          </div>
           </div>
         </div>
 
@@ -149,18 +145,21 @@ const EmployeeDashboard = ({
         <div className="bg-white p-8 rounded-4xl shadow-sm border border-slate-100 h-fit">
           <h3 className="text-lg font-black text-slate-800 mb-6">Upcoming Holidays</h3>
           <div className="space-y-4">
-            {holidays.filter((h) => new Date(h.date) > new Date()).slice(0, 4).map((holiday) => (
-              <div key={holiday._id} className="flex gap-4 items-center group">
-                <div className="bg-blue-50 text-blue-600 p-3 rounded-2xl font-black text-center min-w-14 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                  <p className="text-[10px]">{new Date(holiday.date).toLocaleDateString("en-US", { month: "short" })}</p>
-                  <p className="text-lg mt-1">{new Date(holiday.date).toLocaleDateString("en-US", { day: "numeric" })}</p>
+            {(Array.isArray(holidays) ? holidays : [])
+              .filter((h) => new Date(h.date) > new Date())
+              .slice(0, 4)
+              .map((holiday) => (
+                <div key={holiday._id || holiday.date} className="flex gap-4 items-center group">
+                  <div className="bg-blue-50 text-blue-600 p-3 rounded-2xl font-black text-center min-w-14 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                    <p className="text-[10px]">{new Date(holiday.date).toLocaleDateString("en-US", { month: "short" })}</p>
+                    <p className="text-lg mt-1">{new Date(holiday.date).toLocaleDateString("en-US", { day: "numeric" })}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-800">{holiday.name}</p>
+                    <p className="text-xs text-slate-400 font-medium">{holiday.type ? `${holiday.type} Holiday` : "Official Holiday"}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-bold text-slate-800">{holiday.name}</p>
-                  <p className="text-xs text-slate-400 font-medium">Official Holiday</p>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </div>

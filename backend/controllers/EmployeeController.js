@@ -126,7 +126,12 @@ const getMyAttendance = async (req, res) => {
 const getHolidays = async (req, res) => {
   const { year } = req.query;
 
-  const holidays = await Holiday.find({ year });
+  const hrUserIds = await User.find({ role: "Hr" }).distinct("_id");
+  const holidays = await Holiday.find({
+    year,
+    createdBy: { $in: hrUserIds },
+    name: { $not: /^Company Holiday - /i },
+  });
 
   res.json({ data: holidays });
 };

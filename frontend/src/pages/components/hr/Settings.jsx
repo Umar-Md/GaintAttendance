@@ -29,6 +29,27 @@ const SettingsPage = () => {
     fetchHolidays();
   }, []);
 
+  const handleDeleteHoliday = async (holidayId) => {
+    if (!holidayId) return;
+
+    const ok = window.confirm("Remove this holiday?");
+    if (!ok) return;
+
+    setMessage(null);
+    try {
+      await axios.delete(`${hrURI}/holidays/${holidayId}`, {
+        withCredentials: true,
+      });
+      setMessage({ text: "Holiday removed successfully", type: "success" });
+      fetchHolidays();
+    } catch (err) {
+      setMessage({
+        text: err.response?.data?.message || "Failed to remove holiday",
+        type: "error",
+      });
+    }
+  };
+
   const handleAddHoliday = async (e) => {
     e.preventDefault();
     setMessage(null);
@@ -149,12 +170,13 @@ const SettingsPage = () => {
                     <th className="py-5 px-8 text-left text-sm font-bold">Holiday Name</th>
                     <th className="py-5 px-4 text-left text-sm font-bold">Scheduled Date</th>
                     <th className="py-5 px-8 text-left text-sm font-bold">Category</th>
+                    <th className="py-5 px-8 text-right text-sm font-bold">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {filteredHolidays.length === 0 ? (
                     <tr>
-                      <td colSpan="3" className="p-12 text-center text-slate-400 italic">
+                      <td colSpan="4" className="p-12 text-center text-slate-400 italic">
                         No holiday records found in system.
                       </td>
                     </tr>
@@ -186,6 +208,15 @@ const SettingsPage = () => {
                           }`}>
                             {h.type}
                           </span>
+                        </td>
+                        <td className="py-5 px-8 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteHoliday(h._id)}
+                            className="px-4 py-2 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white transition-colors font-bold text-sm"
+                          >
+                            Remove
+                          </button>
                         </td>
                       </tr>
                     )
