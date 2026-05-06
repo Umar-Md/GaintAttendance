@@ -19,18 +19,33 @@ const FloatingChat = ({ user }) => {
   const [panelHeightPx, setPanelHeightPx] = useState(500);
   const isOpenRef = useRef(false);
   const popupTimeoutRef = useRef(null);
+  const audioContextRef = useRef(null);
   const resizeRef = useRef({
     active: false,
     startClientY: 0,
     startHeight: 0,
   });
 
+  const initAudioContext = () => {
+    if (!audioContextRef.current) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        audioContextRef.current = new AudioContext();
+      }
+    }
+    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+      audioContextRef.current.resume();
+    }
+  };
+
   const playBeep = () => {
     try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
+      if (!audioContextRef.current) {
+        initAudioContext();
+      }
+      if (!audioContextRef.current) return;
 
-      const ctx = new AudioContext();
+      const ctx = audioContextRef.current;
       const oscillator = ctx.createOscillator();
       const gain = ctx.createGain();
 
@@ -136,6 +151,9 @@ const FloatingChat = ({ user }) => {
   const toggleChat = () => {
     setIsOpen((open) => !open);
     setUnreadCount(0);
+    if (!isOpen) {
+      initAudioContext();
+    }
   };
 
   const clampHeight = (nextHeight) => {

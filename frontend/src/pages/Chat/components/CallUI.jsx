@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { FiMic, FiMicOff, FiPhoneCall, FiPhoneOff, FiVideo, FiVideoOff } from "react-icons/fi";
 
 const CallUI = ({
@@ -19,6 +19,11 @@ const CallUI = ({
   toggleCamera,
 }) => {
   const localVideoRef = useRef(null);
+
+  useEffect(() => {
+    if (callType !== "video" || !localStream || !localVideoRef.current) return;
+    localVideoRef.current.srcObject = localStream;
+  }, [callType, localStream]);
 
   if (!isCallVisible) return null;
 

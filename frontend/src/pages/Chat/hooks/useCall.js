@@ -274,5 +274,6 @@ export const useCall = (user, keepSocketAlive) => {
     emitOfferToPeer,
     setCallStatus,
     setCallType,
+    setIncomingCall,
   };
 };

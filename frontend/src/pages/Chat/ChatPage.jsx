@@ -41,6 +41,7 @@ const ChatPage = ({
     emitOfferToPeer,
     setCallStatus,
     setCallType,
+    setIncomingCall,
   } = useCall(user, keepSocketAlive);
 
   const {
