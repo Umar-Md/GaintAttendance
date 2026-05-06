@@ -70,9 +70,9 @@ const ChatbotUI = ({ user }) => {
 
   /* ================= UI ================= */
   return (
-    <div className="fixed bottom-5 right-5 z-9999">
+    <div className="fixed bottom-5 right-5 z-9999 w-full max-w-[90vw] sm:w-80">
       {open ? (
-        <div className="w-80 h-135 bg-white rounded-xl shadow-xl flex flex-col">
+        <div className="w-full max-w-[90vw] sm:w-80 max-h-[90vh] bg-white rounded-xl shadow-xl flex flex-col overflow-hidden">
           {/* HEADER */}
           <div className="bg-green-600 text-white px-4 py-3 flex justify-between">
             <div>
@@ -85,13 +85,13 @@ const ChatbotUI = ({ user }) => {
           </div>
 
           {/* CHAT TYPE */}
-          <div className="flex border-b text-sm">
+          <div className="flex flex-wrap border-b text-sm">
             <button
               onClick={() => {
                 setChatType("GROUP");
                 setMessages([]);
               }}
-              className={`flex-1 py-2 ${
+              className={`flex-1 min-w-25 text-center py-2 ${
                 chatType === "GROUP" ? "bg-green-600 text-white" : "bg-gray-100"
               }`}
             >
@@ -102,7 +102,7 @@ const ChatbotUI = ({ user }) => {
                 setChatType("PRIVATE");
                 setMessages([]);
               }}
-              className={`flex-1 py-2 ${
+              className={`flex-1 min-w-25 text-center py-2 ${
                 chatType === "PRIVATE"
                   ? "bg-green-600 text-white"
                   : "bg-gray-100"
@@ -146,9 +146,9 @@ const ChatbotUI = ({ user }) => {
                   ? "Type 'apply leave'..."
                   : "Type message..."
               }
-              className="flex-1 border rounded-full px-3"
+              className="flex-1 min-w-0 border rounded-full px-3 py-2"
             />
-            <button className="bg-green-600 text-white p-2 rounded-full">
+            <button className="flex items-center justify-center min-w-11 bg-green-600 text-white p-2 rounded-full">
               <FiSend />
             </button>
           </form>

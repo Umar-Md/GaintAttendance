@@ -250,31 +250,35 @@ const FloatingChat = ({ user }) => {
         </div>
       )}
 
-      <button
-        onClick={toggleChat}
-        title="Team Chat"
-        aria-label="Team Chat"
-        className={`group relative w-14 h-14 flex items-center justify-center rounded-full shadow-lg transform transition-all duration-300 hover:scale-110 active:scale-95 pointer-events-auto ${
-          isOpen ? "bg-slate-800 rotate-90" : "bg-indigo-600"
-        } ${pendingCall ? "ring-4 ring-emerald-300 animate-pulse" : ""} ${
-          !isOpen && unreadCount > 0 ? "ring-4 ring-red-200" : ""
-        } text-white`}
-      >
-        {isOpen ? <FiX size={28} /> : <FiMessageSquare size={28} />}
-        {!isOpen && unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 border-2 border-white text-[11px] font-black leading-4 flex items-center justify-center">
-            {unreadCount > 9 ? "9+" : unreadCount}
+      <div className="relative flex items-center">
+        <button
+          onClick={toggleChat}
+          title="Team Chat"
+          aria-label="Team Chat"
+          className={`group relative w-14 h-14 flex items-center justify-center rounded-full shadow-lg transform transition-all duration-300 hover:scale-110 active:scale-95 pointer-events-auto ${
+            isOpen ? "bg-slate-800 rotate-90" : "bg-indigo-600"
+          } ${pendingCall ? "ring-4 ring-emerald-300 animate-pulse" : ""} ${
+            !isOpen && unreadCount > 0 ? "ring-4 ring-red-200" : ""
+          } text-white`}
+        >
+          {isOpen ? <FiX size={28} /> : <FiMessageSquare size={28} />}
+          {!isOpen && unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 border-2 border-white text-[11px] font-black leading-4 flex items-center justify-center">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+          {!isOpen && pendingCall && (
+            <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center">
+              <FiPhoneIncoming size={11} />
+            </span>
+          )}
+        </button>
+        {!isOpen && (
+          <span className="absolute right-full top-1/2 -translate-y-1/2 mr-3 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white shadow-lg">
+            Team Chat
           </span>
         )}
-        {!isOpen && pendingCall && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center">
-            <FiPhoneIncoming size={11} />
-          </span>
-        )}
-        <span className="absolute right-16 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white shadow-lg">
-          Team Chat
-        </span>
-      </button>
+      </div>
     </div>
   );
 };

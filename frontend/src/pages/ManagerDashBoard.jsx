@@ -162,7 +162,7 @@ const ManagerDashboardPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC] font-sans">
+    <div className="flex min-h-screen min-w-0 bg-[#F8FAFC] font-sans">
       {profile && <FloatingChat user={profile} />}
 
       {/* 📱 MOBILE TOP NAV BAR */}
@@ -193,7 +193,7 @@ const ManagerDashboardPage = () => {
 
       {/* Sidebar Drawer */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-72 bg-white shadow-2xl z-70 flex flex-col transition-transform duration-300 ease-in-out
+        className={`fixed left-0 top-0 h-screen w-full max-w-70 lg:w-72 bg-white shadow-2xl z-70 flex flex-col transition-transform duration-300 ease-in-out
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
         <div className="p-8 flex items-center justify-between">
@@ -268,8 +268,8 @@ const ManagerDashboardPage = () => {
       </aside>
 
       {/* 🚀 MAIN CONTENT AREA */}
-      <main className="flex-1 lg:ml-72 p-4 sm:p-6 lg:p-10 mt-16 lg:mt-0">
-        <div className="max-w-350 mx-auto min-h-full">
+      <main className="flex-1 min-w-0 lg:ml-72 p-4 sm:p-6 lg:p-10 mt-16 lg:mt-0">
+        <div className="w-full max-w-full mx-auto min-h-full min-w-0">
           {renderContent()}
         </div>
       </main>
