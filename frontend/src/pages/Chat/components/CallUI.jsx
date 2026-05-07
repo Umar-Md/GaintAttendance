@@ -1,6 +1,26 @@
 import React, { useEffect, useRef } from "react";
 import { FiMic, FiMicOff, FiPhoneCall, FiPhoneOff, FiVideo, FiVideoOff } from "react-icons/fi";
 
+const RemoteVideo = ({ stream }) => {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (!videoRef.current || !stream) return;
+
+    videoRef.current.srcObject = stream;
+    videoRef.current.play().catch(() => {});
+  }, [stream]);
+
+  return (
+    <video
+      ref={videoRef}
+      autoPlay
+      playsInline
+      className="h-full min-h-0 w-full rounded-lg object-cover bg-black"
+    />
+  );
+};
+
 const CallUI = ({
   isCallVisible,
   callStatus,
@@ -61,15 +81,7 @@ const CallUI = ({
             remoteStreams.length === 1 ? "grid-cols-1" : "grid-cols-2"
           }`}>
             {remoteStreams.map(({ peerId, stream }) => (
-              <video
-                key={peerId}
-                ref={(node) => {
-                  if (node) node.srcObject = stream;
-                }}
-                autoPlay
-                playsInline
-                className="h-full min-h-0 w-full rounded-lg object-cover bg-black"
-              />
+              <RemoteVideo key={peerId} stream={stream} />
             ))}
           </div>
         ) : (

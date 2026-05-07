@@ -17,6 +17,7 @@ export const useCall = (user, keepSocketAlive) => {
   const localStreamRef = useRef(null);
   const remoteStreamRef = useRef(null);
   const currentPeerIdsRef = useRef([]);
+  const pendingIceCandidatesRef = useRef({});
   const callStatusRef = useRef("idle");
 
   useEffect(() => {
@@ -49,6 +50,31 @@ export const useCall = (user, keepSocketAlive) => {
 
   const handleCleanupCall = () => {
     cleanupCall(peerConnectionsRef, localStreamRef, setLocalStream, setRemoteStream, setRemoteStreams, setIncomingCall, setIsMuted, setIsCameraOff, setCallStatus, setPeerCount);
+    currentPeerIdsRef.current = [];
+    pendingIceCandidatesRef.current = {};
+  };
+
+  const queueIceCandidate = (peerId, candidate) => {
+    pendingIceCandidatesRef.current[peerId] = [
+      ...(pendingIceCandidatesRef.current[peerId] || []),
+      candidate,
+    ];
+  };
+
+  const flushIceCandidates = async (peerId) => {
+    const pc = peerConnectionsRef.current[peerId];
+    const candidates = pendingIceCandidatesRef.current[peerId] || [];
+    if (!pc || !pc.remoteDescription || candidates.length === 0) return;
+
+    pendingIceCandidatesRef.current[peerId] = [];
+
+    for (const candidate of candidates) {
+      try {
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (err) {
+        console.error("Failed to add queued ICE candidate", err);
+      }
+    }
   };
 
   const handleCreatePeerConnection = (peerId) => {
@@ -67,7 +93,7 @@ export const useCall = (user, keepSocketAlive) => {
         });
         setCallStatus("connected");
       },
-      (peerId) => {
+      () => {
         handleCleanupCall();
       }
     );
@@ -75,6 +101,11 @@ export const useCall = (user, keepSocketAlive) => {
     currentPeerIdsRef.current = Array.from(new Set([...currentPeerIdsRef.current, peerId]));
     setPeerCount(currentPeerIdsRef.current.length);
     return pc;
+  };
+
+  const setLocalMediaStream = (stream) => {
+    localStreamRef.current = stream;
+    setLocalStream(stream);
   };
 
   const removePeerFromCall = (peerId) => {
@@ -117,8 +148,7 @@ export const useCall = (user, keepSocketAlive) => {
       setCallType(type);
       setCallStatus("calling");
       const stream = await getLocalMedia(type);
-      localStreamRef.current = stream;
-      setLocalStream(stream);
+      setLocalMediaStream(stream);
       await emitOfferToPeer(selectedUser, type, stream);
     } catch (err) {
       console.error("Call start failed", err);
@@ -135,12 +165,12 @@ export const useCall = (user, keepSocketAlive) => {
       setCallType(incomingCall.callType);
 
       const stream = await getLocalMedia(incomingCall.callType);
-      localStreamRef.current = stream;
-      setLocalStream(stream);
+      setLocalMediaStream(stream);
       const pc = handleCreatePeerConnection(incomingCall.from._id);
 
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
       await pc.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
+      await flushIceCandidates(incomingCall.from._id);
 
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
@@ -200,12 +230,18 @@ export const useCall = (user, keepSocketAlive) => {
       const pc = peerConnectionsRef.current[from];
       if (!pc) return;
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
+      await flushIceCandidates(from);
       setCallStatus("connected");
     };
 
     const handleIceCandidate = async ({ from, candidate }) => {
       const pc = peerConnectionsRef.current[from];
-      if (!pc || !candidate) return;
+      if (!candidate) return;
+      if (!pc || !pc.remoteDescription) {
+        queueIceCandidate(from, candidate);
+        return;
+      }
+
       try {
         await pc.addIceCandidate(new RTCIceCandidate(candidate));
       } catch (err) {
@@ -272,6 +308,7 @@ export const useCall = (user, keepSocketAlive) => {
     toggleCamera,
     handleCleanupCall,
     emitOfferToPeer,
+    setLocalMediaStream,
     setCallStatus,
     setCallType,
     setIncomingCall,

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
 import { messageURI } from "../../../mainApi";
+import { getLocalMedia } from "../utils/callUtils";
 
-export const useGroupCall = (user, emitOfferToPeer, callStatus, setCallStatus, setCallType, handleCleanupCall) => {
+export const useGroupCall = (user, emitOfferToPeer, callStatus, setCallStatus, setCallType, handleCleanupCall, setLocalMediaStream) => {
   const [showGroupCallModal, setShowGroupCallModal] = useState(false);
   const [groupUsers, setGroupUsers] = useState([]);
   const [selectedGroupMemberIds, setSelectedGroupMemberIds] = useState([]);
@@ -46,10 +47,8 @@ export const useGroupCall = (user, emitOfferToPeer, callStatus, setCallStatus, s
       setCallType(groupCallType);
       setCallStatus("calling");
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: groupCallType === "video",
-      });
+      const stream = await getLocalMedia(groupCallType);
+      setLocalMediaStream(stream);
 
       const groupCallId = `${user._id}-${Date.now()}`;
       const participants = [

@@ -1,11 +1,37 @@
+const splitList = (value) =>
+  value
+    ?.split(",")
+    .map((item) => item.trim())
+    .filter(Boolean) || [];
+
+const turnUrls = splitList(import.meta.env.VITE_TURN_URLS);
+const turnUsername = import.meta.env.VITE_TURN_USERNAME;
+const turnCredential = import.meta.env.VITE_TURN_CREDENTIAL;
+
 export const rtcConfig = {
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  iceServers: [
+    { urls: ["stun:stun.l.google.com:19302", "stun:global.stun.twilio.com:3478"] },
+    ...(turnUrls.length && turnUsername && turnCredential
+      ? [{ urls: turnUrls, username: turnUsername, credential: turnCredential }]
+      : []),
+  ],
 };
 
 export const getLocalMedia = async (type) => {
   const stream = await navigator.mediaDevices.getUserMedia({
-    audio: true,
-    video: type === "video",
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+    },
+    video:
+      type === "video"
+        ? {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: "user",
+          }
+        : false,
   });
   return stream;
 };
@@ -19,9 +45,17 @@ export const createPeerConnection = (rtcConfig, peerId, onIceCandidate, onTrack,
     }
   };
 
+  const fallbackStream = new MediaStream();
+
   pc.ontrack = (event) => {
     const [stream] = event.streams;
-    onTrack(peerId, stream);
+    if (stream) {
+      onTrack(peerId, stream);
+      return;
+    }
+
+    fallbackStream.addTrack(event.track);
+    onTrack(peerId, fallbackStream);
   };
 
   pc.onconnectionstatechange = () => {

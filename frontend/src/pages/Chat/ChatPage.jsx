@@ -26,7 +26,6 @@ const ChatPage = ({
     callType,
     incomingCall,
     localStream,
-    remoteStream,
     remoteStreams,
     isMuted,
     isCameraOff,
@@ -39,6 +38,7 @@ const ChatPage = ({
     toggleCamera,
     handleCleanupCall,
     emitOfferToPeer,
+    setLocalMediaStream,
     setCallStatus,
     setCallType,
     setIncomingCall,
@@ -54,7 +54,7 @@ const ChatPage = ({
     openGroupCallModal,
     toggleGroupMember,
     startGroupCall,
-  } = useGroupCall(user, startCall, callStatus, setCallStatus, setCallType, handleCleanupCall);
+  } = useGroupCall(user, emitOfferToPeer, callStatus, setCallStatus, setCallType, handleCleanupCall, setLocalMediaStream);
 
   useEffect(() => {
     if (!pendingIncomingCall || callStatus !== "idle") return;
@@ -66,7 +66,6 @@ const ChatPage = ({
 
   const callPartner = incomingCall?.from || selectedUser;
   const isCallVisible = callStatus !== "idle";
-  const isGroupCall = remoteStreams.length > 1 || peerCount > 1 || incomingCall?.participants?.length > 2;
 
   return (
     <div className="flex h-full w-full bg-white overflow-hidden relative">
