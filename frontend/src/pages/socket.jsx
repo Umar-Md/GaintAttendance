@@ -1,20 +1,14 @@
 import { io } from "socket.io-client";
-import { backendURI } from "../mainApi";
 
-const socket = io(backendURI, {
-  autoConnect: false,
-  withCredentials: true,
-
-  // FORCE WEBSOCKET
+const socket = io("https://attendance.gaintclout.com", {
+  path: "/socket.io/",
   transports: ["websocket"],
-
   upgrade: false,
-
+  withCredentials: true,
+  autoConnect: false,
   reconnection: true,
   reconnectionAttempts: 10,
   reconnectionDelay: 1000,
-
-  timeout: 20000,
 });
 
 export default socket;
