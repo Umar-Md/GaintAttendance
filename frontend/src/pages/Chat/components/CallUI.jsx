@@ -8,6 +8,18 @@ import {
   FiVideoOff,
 } from "react-icons/fi";
 
+const RemoteAudio = ({ stream, peerId }) => {
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    if (audioRef.current && stream) {
+      audioRef.current.srcObject = stream;
+    }
+  }, [stream]);
+
+  return <audio key={`audio-${peerId}`} ref={audioRef} autoPlay playsInline />;
+};
+
 const CallUI = ({
   isCallVisible,
   callStatus,
@@ -52,12 +64,12 @@ const CallUI = ({
                   incomingCall?.participants?.length > 2 ? "group " : ""
                 }${callType} call`
               : callStatus === "calling"
-                ? isGroupCall
-                  ? `Calling ${peerCount} members`
-                  : `Calling ${callPartner?.userName || "user"}`
-                : `${isGroupCall ? "Group " : ""}${
-                    callType === "video" ? "Video" : "Audio"
-                  } call`}
+              ? isGroupCall
+                ? `Calling ${peerCount} members`
+                : `Calling ${callPartner?.userName || "user"}`
+              : `${isGroupCall ? "Group " : ""}${
+                  callType === "video" ? "Video" : "Audio"
+                } call`}
           </p>
 
           <h2 className="text-xl font-bold">
@@ -85,7 +97,7 @@ const CallUI = ({
               <video
                 key={peerId}
                 ref={(node) => {
-                  if (node) node.srcObject = stream;
+                  if (node && stream) node.srcObject = stream;
                 }}
                 autoPlay
                 playsInline
@@ -96,12 +108,7 @@ const CallUI = ({
         ) : (
           <div className="h-full w-full flex flex-col items-center justify-center gap-4">
             {remoteStreams.map(({ peerId, stream }) => (
-              <RemoteMedia
-                key={`audio-${peerId}`}
-                peerId={peerId}
-                stream={stream}
-                callType="audio"
-              />
+              <RemoteAudio key={`audio-${peerId}`} peerId={peerId} stream={stream} />
             ))}
 
             <img
@@ -121,12 +128,12 @@ const CallUI = ({
                 {callStatus === "connected"
                   ? "Connected"
                   : callStatus === "incoming"
-                    ? incomingCall?.participants?.length > 2
-                      ? `${incomingCall.from?.userName} invited you and ${
-                          incomingCall.participants.length - 2
-                        } others`
-                      : "Waiting for your response"
-                    : "Waiting for answer"}
+                  ? incomingCall?.participants?.length > 2
+                    ? `${incomingCall.from?.userName} invited you and ${
+                        incomingCall.participants.length - 2
+                      } others`
+                    : "Waiting for your response"
+                  : "Waiting for answer"}
               </p>
             </div>
           </div>
