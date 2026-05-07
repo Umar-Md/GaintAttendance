@@ -1,14 +1,13 @@
 import { io } from "socket.io-client";
-import { backendURI } from "../mainApi";
+import { socketURI } from "../mainApi";
 
-const socket = io(backendURI, {
+const socket = io(socketURI, {
   autoConnect: false,
   withCredentials: true,
 
-  // FORCE WEBSOCKET
-  transports: ["websocket"],
-
-  upgrade: false,
+  // allow polling first, then upgrade to websocket when possible
+  transports: ["polling", "websocket"],
+  upgrade: true,
 
   reconnection: true,
   reconnectionAttempts: 10,
