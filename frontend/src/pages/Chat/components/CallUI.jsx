@@ -14,6 +14,24 @@ const RemoteAudio = ({ stream, peerId }) => {
   useEffect(() => {
     if (audioRef.current && stream) {
       audioRef.current.srcObject = stream;
+      try {
+        audioRef.current.muted = false;
+        audioRef.current.volume = 1;
+        const playPromise = audioRef.current.play();
+        if (playPromise && typeof playPromise.then === "function") {
+          playPromise.catch((err) => {
+            console.warn("[CallUI] audio.play() failed:", err);
+            // retry once after a short delay (may help if browser needs user gesture)
+            setTimeout(() => {
+              audioRef.current.play().catch((e) =>
+                console.error("[CallUI] retry audio.play() failed:", e),
+              );
+            }, 250);
+          });
+        }
+      } catch (e) {
+        console.error("[CallUI] audio attach/play error:", e);
+      }
     }
   }, [stream]);
 
