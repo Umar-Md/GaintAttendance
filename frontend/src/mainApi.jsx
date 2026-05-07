@@ -1,14 +1,16 @@
 /* eslint-disable react-refresh/only-export-components */
 
-// Detect environment
 const isLocalHost =
   typeof window !== "undefined" &&
   ["localhost", "127.0.0.1"].includes(window.location.hostname);
 
-// ✅ Backend base URL
-const backendURI = isLocalHost
-  ? "http://localhost:7000"
-  : "/api"; // Nginx proxy in production
+const trimTrailingSlash = (value) => value?.replace(/\/+$/, "");
+
+const backendURI = trimTrailingSlash(
+  import.meta.env.VITE_API_URL || (isLocalHost ? "http://localhost:7000" : "/api")
+);
+
+const socketURI = trimTrailingSlash(import.meta.env.VITE_SOCKET_URL || backendURI);
 
 // ✅ API Routes
 const userURI = `${backendURI}/user`;
@@ -38,6 +40,7 @@ export {
   messageURI,
   managerTaskURI,
   employeeTaskURI,
+  socketURI,
   CLOUD_NAME,
   preset,
 };

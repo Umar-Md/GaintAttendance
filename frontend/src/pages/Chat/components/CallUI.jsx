@@ -8,36 +8,6 @@ import {
   FiVideoOff,
 } from "react-icons/fi";
 
-const RemoteMedia = ({ peerId, stream, callType }) => {
-  const videoRef = useRef(null);
-  const audioRef = useRef(null);
-
-  useEffect(() => {
-    if (videoRef.current && videoRef.current.srcObject !== stream) {
-      videoRef.current.srcObject = stream;
-    }
-
-    if (audioRef.current && audioRef.current.srcObject !== stream) {
-      audioRef.current.srcObject = stream;
-    }
-  }, [stream]);
-
-  return (
-    <>
-      {callType === "video" && (
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          className="h-full min-h-0 w-full rounded-lg object-cover bg-black"
-        />
-      )}
-
-      <audio ref={audioRef} autoPlay playsInline />
-    </>
-  );
-};
-
 const CallUI = ({
   isCallVisible,
   callStatus,
@@ -82,12 +52,12 @@ const CallUI = ({
                   incomingCall?.participants?.length > 2 ? "group " : ""
                 }${callType} call`
               : callStatus === "calling"
-              ? isGroupCall
-                ? `Calling ${peerCount} members`
-                : `Calling ${callPartner?.userName || "user"}`
-              : `${isGroupCall ? "Group " : ""}${
-                  callType === "video" ? "Video" : "Audio"
-                } call`}
+                ? isGroupCall
+                  ? `Calling ${peerCount} members`
+                  : `Calling ${callPartner?.userName || "user"}`
+                : `${isGroupCall ? "Group " : ""}${
+                    callType === "video" ? "Video" : "Audio"
+                  } call`}
           </p>
 
           <h2 className="text-xl font-bold">
@@ -112,11 +82,14 @@ const CallUI = ({
             }`}
           >
             {remoteStreams.map(({ peerId, stream }) => (
-              <RemoteMedia
+              <video
                 key={peerId}
-                peerId={peerId}
-                stream={stream}
-                callType={callType}
+                ref={(node) => {
+                  if (node) node.srcObject = stream;
+                }}
+                autoPlay
+                playsInline
+                className="h-full min-h-0 w-full rounded-lg object-cover bg-black"
               />
             ))}
           </div>
@@ -148,12 +121,12 @@ const CallUI = ({
                 {callStatus === "connected"
                   ? "Connected"
                   : callStatus === "incoming"
-                  ? incomingCall?.participants?.length > 2
-                    ? `${incomingCall.from?.userName} invited you and ${
-                        incomingCall.participants.length - 2
-                      } others`
-                    : "Waiting for your response"
-                  : "Waiting for answer"}
+                    ? incomingCall?.participants?.length > 2
+                      ? `${incomingCall.from?.userName} invited you and ${
+                          incomingCall.participants.length - 2
+                        } others`
+                      : "Waiting for your response"
+                    : "Waiting for answer"}
               </p>
             </div>
           </div>

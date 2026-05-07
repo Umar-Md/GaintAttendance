@@ -55,6 +55,7 @@ Frontend:
 - Output directory: `dist`
 - Required environment variable: `VITE_API_URL` set to the deployed backend URL
 - Optional environment variables: `VITE_CLOUDINARY_CLOUD_NAME`, `VITE_CLOUDINARY_UPLOAD_PRESET`
+- Optional call environment variables: `VITE_SOCKET_URL`, `VITE_TURN_URLS`, `VITE_TURN_USERNAME`, `VITE_TURN_CREDENTIAL`
 
 If frontend and backend are on different domains, keep `CLIENT_URL` on the backend exactly equal to the deployed frontend origin, for example `https://your-app.vercel.app`.
 
@@ -69,6 +70,9 @@ The frontend production build already uses:
 
 ```sh
 VITE_API_URL=https://attendance.gaintclout.com
+VITE_SOCKET_URL=https://attendance.gaintclout.com
 ```
 
 After changing any `VITE_*` variable or `.env.production`, rebuild and redeploy the frontend because Vite embeds these values at build time.
+
+For deployed voice/video calls, configure a TURN server and set `VITE_TURN_URLS`, `VITE_TURN_USERNAME`, and `VITE_TURN_CREDENTIAL`. STUN alone is not reliable across office networks, mobile networks, and strict NAT/firewall setups.

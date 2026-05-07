@@ -22,6 +22,7 @@ export const useCall = (user, keepSocketAlive) => {
   const localStreamRef = useRef(null);
   const remoteStreamRef = useRef(null);
   const currentPeerIdsRef = useRef([]);
+  const pendingIceCandidatesRef = useRef({});
   const callStatusRef = useRef("idle");
 
   // Important fix: store ICE candidates until remoteDescription is set
@@ -67,11 +68,8 @@ export const useCall = (user, keepSocketAlive) => {
       setIsMuted,
       setIsCameraOff,
       setCallStatus,
-      setPeerCount
+      setPeerCount,
     );
-
-    currentPeerIdsRef.current = [];
-    pendingCandidatesRef.current = {};
   };
 
   const handleCreatePeerConnection = (peerId) => {
@@ -94,16 +92,21 @@ export const useCall = (user, keepSocketAlive) => {
       },
       () => {
         handleCleanupCall();
-      }
+      },
     );
 
     peerConnectionsRef.current[peerId] = pc;
     currentPeerIdsRef.current = Array.from(
-      new Set([...currentPeerIdsRef.current, peerId])
+      new Set([...currentPeerIdsRef.current, peerId]),
     );
     setPeerCount(currentPeerIdsRef.current.length);
 
     return pc;
+  };
+
+  const setLocalMediaStream = (stream) => {
+    localStreamRef.current = stream;
+    setLocalStream(stream);
   };
 
   const removePeerFromCall = (peerId) => {
@@ -111,7 +114,7 @@ export const useCall = (user, keepSocketAlive) => {
     delete peerConnectionsRef.current[peerId];
 
     currentPeerIdsRef.current = currentPeerIdsRef.current.filter(
-      (id) => id !== peerId
+      (id) => id !== peerId,
     );
 
     delete pendingCandidatesRef.current[peerId];
@@ -132,7 +135,7 @@ export const useCall = (user, keepSocketAlive) => {
     type,
     stream,
     groupCallId,
-    participants
+    participants,
   ) => {
     const pc = handleCreatePeerConnection(peer._id);
 
@@ -168,7 +171,6 @@ export const useCall = (user, keepSocketAlive) => {
       const stream = await getLocalMedia(type);
       localStreamRef.current = stream;
       setLocalStream(stream);
-
       await emitOfferToPeer(selectedUser, type, stream);
     } catch (err) {
       console.error("Call start failed", err);
@@ -187,23 +189,12 @@ export const useCall = (user, keepSocketAlive) => {
       const stream = await getLocalMedia(incomingCall.callType);
       localStreamRef.current = stream;
       setLocalStream(stream);
-
       const pc = handleCreatePeerConnection(incomingCall.from._id);
 
-      stream.getTracks().forEach((track) => {
-        pc.addTrack(track, stream);
-      });
-
+      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
       await pc.setRemoteDescription(
-        new RTCSessionDescription(incomingCall.offer)
+        new RTCSessionDescription(incomingCall.offer),
       );
-
-      // Flush queued ICE candidates after setting remote offer
-      const queued = pendingCandidatesRef.current[incomingCall.from._id] || [];
-      for (const candidate of queued) {
-        await pc.addIceCandidate(new RTCIceCandidate(candidate));
-      }
-      pendingCandidatesRef.current[incomingCall.from._id] = [];
 
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
@@ -277,27 +268,13 @@ export const useCall = (user, keepSocketAlive) => {
     const handleAnswer = async ({ from, answer }) => {
       const pc = peerConnectionsRef.current[from];
       if (!pc) return;
-
-      try {
-        await pc.setRemoteDescription(new RTCSessionDescription(answer));
-
-        // Flush queued ICE candidates after setting remote answer
-        const queued = pendingCandidatesRef.current[from] || [];
-        for (const candidate of queued) {
-          await pc.addIceCandidate(new RTCIceCandidate(candidate));
-        }
-
-        pendingCandidatesRef.current[from] = [];
-        setCallStatus("connected");
-      } catch (err) {
-        console.error("Failed to handle answer", err);
-      }
+      await pc.setRemoteDescription(new RTCSessionDescription(answer));
+      setCallStatus("connected");
     };
 
     const handleIceCandidate = async ({ from, candidate }) => {
       const pc = peerConnectionsRef.current[from];
       if (!pc || !candidate) return;
-
       try {
         if (pc.remoteDescription && pc.remoteDescription.type) {
           await pc.addIceCandidate(new RTCIceCandidate(candidate));
@@ -378,6 +355,7 @@ export const useCall = (user, keepSocketAlive) => {
     toggleCamera,
     handleCleanupCall,
     emitOfferToPeer,
+    setLocalMediaStream,
     setCallStatus,
     setCallType,
     setIncomingCall,
