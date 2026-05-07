@@ -1,20 +1,20 @@
 import { io } from "socket.io-client";
-import { socketURI } from "../mainApi";
+import { backendURI } from "../mainApi";
 
-const resolveSocketOptions = (url) => {
-  if (typeof window === "undefined") return {};
-
-  const parsed = new URL(url, window.location.origin);
-  const isApiPrefix = parsed.pathname && parsed.pathname !== "/";
-
-  return {
-    path: isApiPrefix ? `${parsed.pathname.replace(/\/+$/, "")}/socket.io` : "/socket.io",
-  };
-};
-
-const socket = io(socketURI, {
+const socket = io(backendURI, {
   autoConnect: false,
   withCredentials: true,
+
+  // FORCE WEBSOCKET
+  transports: ["websocket"],
+
+  upgrade: false,
+
+  reconnection: true,
+  reconnectionAttempts: 10,
+  reconnectionDelay: 1000,
+
+  timeout: 20000,
 });
 
 export default socket;
