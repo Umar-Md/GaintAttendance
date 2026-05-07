@@ -22,11 +22,8 @@ export const useCall = (user, keepSocketAlive) => {
   const localStreamRef = useRef(null);
   const remoteStreamRef = useRef(null);
   const currentPeerIdsRef = useRef([]);
-  const pendingIceCandidatesRef = useRef({});
-  const callStatusRef = useRef("idle");
-
-  // Important fix: store ICE candidates until remoteDescription is set
   const pendingCandidatesRef = useRef({});
+  const callStatusRef = useRef("idle");
 
   useEffect(() => {
     callStatusRef.current = callStatus;
@@ -36,7 +33,12 @@ export const useCall = (user, keepSocketAlive) => {
     if (!user?._id) return;
 
     socket.io.opts.query = { userId: user._id };
-    socket.connect();
+
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    console.log("Socket connected for user:", user._id);
 
     return () => {
       if (!keepSocketAlive) {
@@ -68,8 +70,11 @@ export const useCall = (user, keepSocketAlive) => {
       setIsMuted,
       setIsCameraOff,
       setCallStatus,
-      setPeerCount,
+      setPeerCount
     );
+
+    currentPeerIdsRef.current = [];
+    pendingCandidatesRef.current = {};
   };
 
   const handleCreatePeerConnection = (peerId) => {
@@ -77,9 +82,12 @@ export const useCall = (user, keepSocketAlive) => {
       rtcConfig,
       peerId,
       (peerId, candidate) => {
+        console.log("Sending ICE candidate to:", peerId);
         socket.emit("call:ice-candidate", { to: peerId, candidate });
       },
       (peerId, stream) => {
+        console.log("Remote stream received from:", peerId);
+
         remoteStreamRef.current = stream;
         setRemoteStream(stream);
 
@@ -90,23 +98,35 @@ export const useCall = (user, keepSocketAlive) => {
 
         setCallStatus("connected");
       },
-      () => {
-        handleCleanupCall();
-      },
+      (peerId) => {
+        console.log("Peer connection failed/closed:", peerId);
+        removePeerFromCall(peerId);
+      }
     );
 
     peerConnectionsRef.current[peerId] = pc;
+
     currentPeerIdsRef.current = Array.from(
-      new Set([...currentPeerIdsRef.current, peerId]),
+      new Set([...currentPeerIdsRef.current, peerId])
     );
+
     setPeerCount(currentPeerIdsRef.current.length);
 
     return pc;
   };
 
-  const setLocalMediaStream = (stream) => {
-    localStreamRef.current = stream;
-    setLocalStream(stream);
+  const addPendingCandidates = async (peerId, pc) => {
+    const pending = pendingCandidatesRef.current[peerId] || [];
+
+    for (const candidate of pending) {
+      try {
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (err) {
+        console.error("Failed adding pending ICE:", err);
+      }
+    }
+
+    pendingCandidatesRef.current[peerId] = [];
   };
 
   const removePeerFromCall = (peerId) => {
@@ -114,7 +134,7 @@ export const useCall = (user, keepSocketAlive) => {
     delete peerConnectionsRef.current[peerId];
 
     currentPeerIdsRef.current = currentPeerIdsRef.current.filter(
-      (id) => id !== peerId,
+      (id) => id !== peerId
     );
 
     delete pendingCandidatesRef.current[peerId];
@@ -135,8 +155,10 @@ export const useCall = (user, keepSocketAlive) => {
     type,
     stream,
     groupCallId,
-    participants,
+    participants
   ) => {
+    console.log("Creating offer to:", peer._id);
+
     const pc = handleCreatePeerConnection(peer._id);
 
     stream.getTracks().forEach((track) => {
@@ -165,12 +187,16 @@ export const useCall = (user, keepSocketAlive) => {
     if (!selectedUser?._id || callStatusRef.current !== "idle") return;
 
     try {
+      console.log("Starting call to:", selectedUser._id);
+
       setCallType(type);
       setCallStatus("calling");
 
       const stream = await getLocalMedia(type);
+
       localStreamRef.current = stream;
       setLocalStream(stream);
+
       await emitOfferToPeer(selectedUser, type, stream);
     } catch (err) {
       console.error("Call start failed", err);
@@ -183,18 +209,27 @@ export const useCall = (user, keepSocketAlive) => {
     if (!incomingCall) return;
 
     try {
+      console.log("Accepting call from:", incomingCall.from._id);
+
       setCallStatus("connecting");
       setCallType(incomingCall.callType);
 
       const stream = await getLocalMedia(incomingCall.callType);
+
       localStreamRef.current = stream;
       setLocalStream(stream);
+
       const pc = handleCreatePeerConnection(incomingCall.from._id);
 
-      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+      stream.getTracks().forEach((track) => {
+        pc.addTrack(track, stream);
+      });
+
       await pc.setRemoteDescription(
-        new RTCSessionDescription(incomingCall.offer),
+        new RTCSessionDescription(incomingCall.offer)
       );
+
+      await addPendingCandidates(incomingCall.from._id, pc);
 
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
@@ -255,6 +290,8 @@ export const useCall = (user, keepSocketAlive) => {
 
   useEffect(() => {
     const handleIncomingOffer = ({ from, offer, callType: incomingType }) => {
+      console.log("Incoming call offer from:", from?._id);
+
       if (callStatusRef.current !== "idle") {
         socket.emit("call:reject", { to: from._id });
         return;
@@ -266,17 +303,26 @@ export const useCall = (user, keepSocketAlive) => {
     };
 
     const handleAnswer = async ({ from, answer }) => {
+      console.log("Received answer from:", from);
+
       const pc = peerConnectionsRef.current[from];
       if (!pc) return;
+
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
+      await addPendingCandidates(from, pc);
+
       setCallStatus("connected");
     };
 
     const handleIceCandidate = async ({ from, candidate }) => {
+      console.log("Received ICE candidate from:", from);
+
       const pc = peerConnectionsRef.current[from];
-      if (!pc || !candidate) return;
+
+      if (!candidate) return;
+
       try {
-        if (pc.remoteDescription && pc.remoteDescription.type) {
+        if (pc && pc.remoteDescription && pc.remoteDescription.type) {
           await pc.addIceCandidate(new RTCIceCandidate(candidate));
         } else {
           if (!pendingCandidatesRef.current[from]) {
@@ -291,6 +337,8 @@ export const useCall = (user, keepSocketAlive) => {
     };
 
     const handleCallEnd = ({ from }) => {
+      console.log("Call ended by:", from);
+
       if (from && currentPeerIdsRef.current.length > 1) {
         removePeerFromCall(from);
         return;
@@ -300,6 +348,8 @@ export const useCall = (user, keepSocketAlive) => {
     };
 
     const handleCallRejected = ({ from }) => {
+      console.log("Call rejected by:", from);
+
       if (from && currentPeerIdsRef.current.length > 1) {
         removePeerFromCall(from);
         return;
@@ -355,7 +405,10 @@ export const useCall = (user, keepSocketAlive) => {
     toggleCamera,
     handleCleanupCall,
     emitOfferToPeer,
-    setLocalMediaStream,
+    setLocalMediaStream: (stream) => {
+      localStreamRef.current = stream;
+      setLocalStream(stream);
+    },
     setCallStatus,
     setCallType,
     setIncomingCall,
