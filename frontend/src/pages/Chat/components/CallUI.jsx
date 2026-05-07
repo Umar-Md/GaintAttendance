@@ -1,5 +1,42 @@
 import React, { useEffect, useRef } from "react";
-import { FiMic, FiMicOff, FiPhoneCall, FiPhoneOff, FiVideo, FiVideoOff } from "react-icons/fi";
+import {
+  FiMic,
+  FiMicOff,
+  FiPhoneCall,
+  FiPhoneOff,
+  FiVideo,
+  FiVideoOff,
+} from "react-icons/fi";
+
+const RemoteMedia = ({ peerId, stream, callType }) => {
+  const videoRef = useRef(null);
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    if (videoRef.current && videoRef.current.srcObject !== stream) {
+      videoRef.current.srcObject = stream;
+    }
+
+    if (audioRef.current && audioRef.current.srcObject !== stream) {
+      audioRef.current.srcObject = stream;
+    }
+  }, [stream]);
+
+  return (
+    <>
+      {callType === "video" && (
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className="h-full min-h-0 w-full rounded-lg object-cover bg-black"
+        />
+      )}
+
+      <audio ref={audioRef} autoPlay playsInline />
+    </>
+  );
+};
 
 const CallUI = ({
   isCallVisible,
@@ -22,12 +59,18 @@ const CallUI = ({
 
   useEffect(() => {
     if (callType !== "video" || !localStream || !localVideoRef.current) return;
-    localVideoRef.current.srcObject = localStream;
+
+    if (localVideoRef.current.srcObject !== localStream) {
+      localVideoRef.current.srcObject = localStream;
+    }
   }, [callType, localStream]);
 
   if (!isCallVisible) return null;
 
-  const isGroupCall = remoteStreams.length > 1 || peerCount > 1 || incomingCall?.participants?.length > 2;
+  const isGroupCall =
+    remoteStreams.length > 1 ||
+    peerCount > 1 ||
+    incomingCall?.participants?.length > 2;
 
   return (
     <div className="absolute inset-0 z-50 bg-slate-950/95 text-white flex flex-col">
@@ -35,17 +78,23 @@ const CallUI = ({
         <div>
           <p className="text-sm text-slate-300">
             {callStatus === "incoming"
-              ? `Incoming ${incomingCall?.participants?.length > 2 ? "group " : ""}${callType} call`
+              ? `Incoming ${
+                  incomingCall?.participants?.length > 2 ? "group " : ""
+                }${callType} call`
               : callStatus === "calling"
-                ? isGroupCall
-                  ? `Calling ${peerCount} members`
-                  : `Calling ${callPartner?.userName || "user"}`
-                : `${isGroupCall ? "Group " : ""}${callType === "video" ? "Video" : "Audio"} call`}
+              ? isGroupCall
+                ? `Calling ${peerCount} members`
+                : `Calling ${callPartner?.userName || "user"}`
+              : `${isGroupCall ? "Group " : ""}${
+                  callType === "video" ? "Video" : "Audio"
+                } call`}
           </p>
+
           <h2 className="text-xl font-bold">
             {isGroupCall ? "Team call" : callPartner?.userName}
           </h2>
         </div>
+
         <button
           onClick={callStatus === "incoming" ? rejectCall : endCall}
           className="p-3 bg-red-500 hover:bg-red-600 rounded-full transition-all"
@@ -57,41 +106,54 @@ const CallUI = ({
 
       <div className="relative flex-1 overflow-hidden bg-slate-900">
         {callType === "video" && remoteStreams.length > 0 ? (
-          <div className={`h-full w-full grid gap-2 p-2 ${
-            remoteStreams.length === 1 ? "grid-cols-1" : "grid-cols-2"
-          }`}>
+          <div
+            className={`h-full w-full grid gap-2 p-2 ${
+              remoteStreams.length === 1 ? "grid-cols-1" : "grid-cols-2"
+            }`}
+          >
             {remoteStreams.map(({ peerId, stream }) => (
-              <video
+              <RemoteMedia
                 key={peerId}
-                ref={(node) => {
-                  if (node) node.srcObject = stream;
-                }}
-                autoPlay
-                playsInline
-                className="h-full min-h-0 w-full rounded-lg object-cover bg-black"
+                peerId={peerId}
+                stream={stream}
+                callType={callType}
               />
             ))}
           </div>
         ) : (
           <div className="h-full w-full flex flex-col items-center justify-center gap-4">
+            {remoteStreams.map(({ peerId, stream }) => (
+              <RemoteMedia
+                key={`audio-${peerId}`}
+                peerId={peerId}
+                stream={stream}
+                callType="audio"
+              />
+            ))}
+
             <img
               src={
                 callPartner?.imageUrl ||
-                `https://ui-avatars.com/api/?name=${callPartner?.userName || "User"}&background=4f46e5&color=fff`
+                `https://ui-avatars.com/api/?name=${
+                  callPartner?.userName || "User"
+                }&background=4f46e5&color=fff`
               }
               alt="caller"
               className="w-24 h-24 rounded-full border-4 border-white/10 object-cover"
             />
+
             <div className="text-center">
               <p className="text-lg font-semibold">{callPartner?.userName}</p>
               <p className="text-sm text-slate-400">
                 {callStatus === "connected"
                   ? "Connected"
                   : callStatus === "incoming"
-                    ? incomingCall?.participants?.length > 2
-                      ? `${incomingCall.from?.userName} invited you and ${incomingCall.participants.length - 2} others`
-                      : "Waiting for your response"
-                    : "Waiting for answer"}
+                  ? incomingCall?.participants?.length > 2
+                    ? `${incomingCall.from?.userName} invited you and ${
+                        incomingCall.participants.length - 2
+                      } others`
+                    : "Waiting for your response"
+                  : "Waiting for answer"}
               </p>
             </div>
           </div>
@@ -116,6 +178,7 @@ const CallUI = ({
           >
             <FiPhoneOff /> Decline
           </button>
+
           <button
             onClick={acceptCall}
             className="flex items-center gap-2 px-5 py-3 rounded-full bg-emerald-500 hover:bg-emerald-600 font-bold transition-all"
@@ -132,6 +195,7 @@ const CallUI = ({
           >
             {isMuted ? <FiMicOff size={20} /> : <FiMic size={20} />}
           </button>
+
           {callType === "video" && (
             <button
               onClick={toggleCamera}
@@ -141,6 +205,7 @@ const CallUI = ({
               {isCameraOff ? <FiVideoOff size={20} /> : <FiVideo size={20} />}
             </button>
           )}
+
           <button
             onClick={endCall}
             className="p-4 rounded-full bg-red-500 hover:bg-red-600 transition-all"
