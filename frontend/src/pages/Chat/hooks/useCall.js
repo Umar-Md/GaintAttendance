@@ -88,6 +88,28 @@ export const useCall = (user, keepSocketAlive) => {
       (peerId, stream) => {
         console.log("Remote stream received from:", peerId);
 
+        // Detect accidental loopback: if remote stream contains the same track ids as our local stream,
+        // it's likely we're receiving our own audio back. Ignore to avoid echo.
+        try {
+          const local = localStreamRef.current;
+          if (local && stream) {
+            const localTrackIds = (local.getAudioTracks() || []).map((t) => t.id).concat(
+              (local.getVideoTracks() || []).map((t) => t.id),
+            );
+            const remoteTrackIds = (stream.getAudioTracks() || []).map((t) => t.id).concat(
+              (stream.getVideoTracks() || []).map((t) => t.id),
+            );
+
+            const overlap = remoteTrackIds.some((id) => localTrackIds.includes(id));
+            if (overlap) {
+              console.warn("Detected loopback remote stream from", peerId, "— ignoring to prevent echo");
+              return;
+            }
+          }
+        } catch (e) {
+          console.error("Error while checking loopback tracks:", e);
+        }
+
         remoteStreamRef.current = stream;
         setRemoteStream(stream);
 
