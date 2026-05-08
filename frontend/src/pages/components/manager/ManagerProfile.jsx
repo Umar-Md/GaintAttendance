@@ -110,14 +110,14 @@ const ManagerProfile = () => {
   };
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center min-h-100">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
       <Loader2 className="w-10 h-10 animate-spin text-blue-600 mb-4" />
       <p className="text-black font-medium">Verifying Manager Access...</p>
     </div>
   );
 
   if (error) return (
-    <div className="max-w-4xl mx-auto mt-10 p-8 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-4 text-red-700">
+    <div className="max-w-4xl mx-auto mt-6 sm:mt-10 p-5 sm:p-8 bg-red-50 border border-red-200 rounded-2xl flex items-center gap-4 text-red-700">
       <AlertCircle size={32} />
       <div>
         <h3 className="font-bold text-lg">Access Denied</h3>
@@ -128,14 +128,14 @@ const ManagerProfile = () => {
   );
 
   return (
-    <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
-      <div className="bg-white rounded-4xl shadow-sm border border-slate-100 overflow-hidden">
+<div className="w-full max-w-6xl mx-auto px-3 sm:px-5 lg:px-6 py-4 sm:py-6 animate-in fade-in duration-500">      
+ <div className="bg-white rounded-4xl sm:rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
         
         {/* HEADER - Increased padding to ensure text visibility */}
-        <div className="bg-[#618DF4] p-10 pb-20 relative">
-          <div className="flex flex-col sm:flex-row items-center gap-8">
+<div className="bg-[#618DF4] px-5 sm:px-8 lg:px-10 pt-8 sm:pt-10 pb-24 sm:pb-20 relative">
+         <div className="flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8">
             <div className="relative">
-              <div className="w-32 h-32 rounded-3xl border-4 border-white/30 overflow-hidden shadow-2xl">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-3xl border-4 border-white/30 overflow-hidden shadow-2xl">
                 {loadingImage ? (
                   <div className="w-full h-full bg-slate-800 flex items-center justify-center">
                     <Loader2 className="animate-spin text-white" />
@@ -166,8 +166,8 @@ const ManagerProfile = () => {
             </div>
 
             <div className="text-center sm:text-left text-white">
-              <h2 className="text-4xl font-black  mb-1">{profile.userName}</h2>
-              <div className="flex flex-wrap justify-center sm:justify-start gap-3 items-center opacity-90">
+             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-1 wrap-break-word">{profile.userName}</h2>
+              <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 items-center opacity-90">
                 <span className="bg-white/20 px-3 py-1 rounded-lg text-sm font-bold backdrop-blur-md">
                    {profile.role}
                 </span>
@@ -180,13 +180,13 @@ const ManagerProfile = () => {
         </div>
 
         {/* BODY */}
-        <div className="p-10 -mt-8 bg-white rounded-t-[3rem] relative z-10">
-          <div className="flex justify-between items-center mb-10">
-            <h3 className="text-2xl font-black text-black ">Personal Information</h3>
+        <div className="px-4 sm:px-6 lg:px-10 py-6 sm:py-8 -mt-8 bg-white rounded-t-4xl sm:rounded-t-[3rem] relative z-10">
+         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8 sm:mb-10">
+            <h3 className="text-xl sm:text-2xl font-black text-black">Personal Information</h3>
 
             <button
               onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-              className={`px-6 py-2.5 rounded-xl flex items-center gap-2 font-bold transition-all active:scale-95 shadow-lg ${
+              className={`w-full sm:w-auto justify-center px-5 sm:px-6 py-3 rounded-xl flex items-center gap-2 font-bold transition-all active:scale-95 shadow-lg ${
                 isEditing ? "bg-emerald-500 text-white shadow-emerald-200" : "bg-blue-600 text-white shadow-blue-200"
               }`}
             >
@@ -195,7 +195,7 @@ const ManagerProfile = () => {
             </button>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
             <div className="space-y-6">
               <Field
                 icon={<User size={18} className="text-blue-500" />}
@@ -239,11 +239,11 @@ const ManagerProfile = () => {
             </div>
           </div>
           {/* BIO */}
-          <div className="mt-10 border-t border-slate-50 pt-10">
+          <div className="mt-8 sm:mt-10 border-t border-slate-50 pt-8 sm:pt-10">
             <label className="text-[14px]  font-black text-black  ml-1 mb-3 block">Professional Bio</label>
             {isEditing ? (
               <textarea
-                className="w-full border-2 border-slate-100 rounded-2xl p-5 focus:border-blue-500 outline-none transition-all font-medium"
+                className="w-full border-2 border-slate-100 rounded-2xl p-4 sm:p-5 text-sm sm:text-base focus:border-blue-500 outline-none transition-all font-medium"
                 rows={4}
                 value={formData.bio}
                 onChange={(e) =>
@@ -259,7 +259,7 @@ const ManagerProfile = () => {
           </div>
 
           {isEditing && (
-            <div className="flex justify-end mt-8">
+            <div className="flex justify-center sm:justify-end mt-6 sm:mt-8">
               <button
                 onClick={() => {
                   setIsEditing(false);
@@ -292,10 +292,10 @@ const Field = ({ icon, label, editable, value, onChange }) => (
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border-2 border-slate-100 p-4 rounded-xl focus:border-blue-600 outline-none font-bold text-black transition-all"
+        className="w-full border-2 border-slate-100 p-3 sm:p-4 rounded-xl text-sm sm:text-base focus:border-blue-600 outline-none font-bold text-black transition-all"
       />
     ) : (
-      <p className="bg-slate-50/50 border border-slate-100 p-4 rounded-xl font-bold text-slate-600">{value || "Not Set"}</p>
+      <p className="bg-slate-50/50 border border-slate-100 p-3 sm:p-4 rounded-xl text-sm sm:text-base font-bold text-slate-600">{value || "Not Set"}</p>
     )}
   </div>
 );
