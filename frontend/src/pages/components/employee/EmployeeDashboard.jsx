@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   CheckCircle,
   Clock,
@@ -12,6 +12,16 @@ const EmployeeDashboard = ({
   leaves = [],
   holidays = [],
 }) => {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
   const normalizeStatus = (status) =>
     String(status || "")
       .trim()
@@ -36,6 +46,30 @@ const EmployeeDashboard = ({
   const todayAttendance = attendance.find(
     (a) => a.date === new Date().toISOString().split("T")[0]
   );
+
+  const formatDuration = (milliseconds) => {
+    if (!milliseconds || milliseconds < 0) return "00:00:00";
+
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return [hours, minutes, seconds]
+      .map((value) => String(value).padStart(2, "0"))
+      .join(":");
+  };
+
+  const elapsedTime = (() => {
+    if (!todayAttendance?.startTime) return "00:00:00";
+
+    const start = new Date(todayAttendance.startTime).getTime();
+    const end = todayAttendance.endTime
+      ? new Date(todayAttendance.endTime).getTime()
+      : now;
+
+    return formatDuration(end - start);
+  })();
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -78,6 +112,10 @@ const EmployeeDashboard = ({
                   <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
                     <p className="text-[10px] font-bold text-slate-400 ">Out Time</p>
                     <p className="font-bold text-slate-700">{formatToTime(todayAttendance?.endTime)}</p>
+                  </div>
+                  <div className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100">
+                    <p className="text-[10px] font-bold text-blue-400 ">Time Worked</p>
+                    <p className="font-mono font-black text-blue-700">{elapsedTime}</p>
                   </div>
                 </div>
               </div>

@@ -280,6 +280,90 @@ const getManagersAttendanceForHR = async (req, res) => {
   }
 };
 
+const getMyAttendanceForHR = async (req, res) => {
+  try {
+    const attendance = await Attendance.find({
+      userId: req.userId,
+    }).sort({ date: -1 });
+
+    return res.status(200).json({ data: attendance });
+  } catch (error) {
+    console.error("Error fetching HR attendance:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+const getEmployeeLoginDetailsForHR = async (req, res) => {
+  try {
+    const { from, to, date, employeeId, department } = req.query;
+
+    const managers = await User.find({
+      role: "Manager",
+      hrId: req.userId,
+    }).select("_id");
+
+    if (!managers.length) {
+      return res.status(200).json({ success: true, count: 0, data: [] });
+    }
+
+    const managerIds = managers.map((manager) => manager._id);
+    const employeeQuery = {
+      role: "Employee",
+      managerId: { $in: managerIds },
+    };
+
+    if (employeeId) {
+      employeeQuery._id = employeeId;
+    }
+
+    if (department) {
+      employeeQuery.department = department;
+    }
+
+    const employees = await User.find(employeeQuery).select("_id");
+
+    if (!employees.length) {
+      return res.status(200).json({ success: true, count: 0, data: [] });
+    }
+
+    const employeeIds = employees.map((employee) => employee._id);
+    const attendanceQuery = {
+      userId: { $in: employeeIds },
+    };
+
+    if (date) {
+      attendanceQuery.date = date;
+    } else if (from || to) {
+      attendanceQuery.date = {};
+      if (from) attendanceQuery.date.$gte = from;
+      if (to) attendanceQuery.date.$lte = to;
+    }
+
+    const attendance = await Attendance.find(attendanceQuery)
+      .populate({
+        path: "userId",
+        select: "userName email role department managerId imageUrl",
+        populate: {
+          path: "managerId",
+          select: "userName email",
+        },
+      })
+      .sort({ date: -1, startTime: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: attendance.length,
+      data: attendance,
+    });
+  } catch (error) {
+    console.error("Error fetching employee login details:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
 const getTeamLeaves = async (req, res) => {
   try {
     console.log(req.userId);
@@ -529,6 +613,8 @@ export {
   getHrDetails,
   getManagers,
   getEmployees,
+  getEmployeeLoginDetailsForHR,
+  getMyAttendanceForHR,
   deleteManager,
   activateManager,
   permanentlyDeleteManager,

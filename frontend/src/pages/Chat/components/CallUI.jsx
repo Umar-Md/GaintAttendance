@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   FiMic,
   FiMicOff,
@@ -56,6 +56,7 @@ const CallUI = ({
   toggleCamera,
 }) => {
   const localVideoRef = useRef(null);
+  const [callSeconds, setCallSeconds] = useState(0);
 
   useEffect(() => {
     if (callType !== "video" || !localStream || !localVideoRef.current) return;
@@ -65,12 +66,29 @@ const CallUI = ({
     }
   }, [callType, localStream]);
 
+  useEffect(() => {
+    if (callStatus !== "connected") {
+      setCallSeconds(0);
+      return undefined;
+    }
+
+    const timer = window.setInterval(() => {
+      setCallSeconds((seconds) => seconds + 1);
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [callStatus]);
+
   if (!isCallVisible) return null;
 
   const isGroupCall =
     remoteStreams.length > 1 ||
     peerCount > 1 ||
     incomingCall?.participants?.length > 2;
+  const durationLabel = `${String(Math.floor(callSeconds / 60)).padStart(
+    2,
+    "0",
+  )}:${String(callSeconds % 60).padStart(2, "0")}`;
 
   return (
     <div className="absolute inset-0 z-50 bg-slate-950/95 text-white flex flex-col">
@@ -93,6 +111,11 @@ const CallUI = ({
           <h2 className="text-xl font-bold">
             {isGroupCall ? "Team call" : callPartner?.userName}
           </h2>
+          {callStatus === "connected" && (
+            <p className="mt-1 font-mono text-sm font-bold text-emerald-300">
+              {durationLabel}
+            </p>
+          )}
         </div>
 
         <button
@@ -144,7 +167,7 @@ const CallUI = ({
               <p className="text-lg font-semibold">{callPartner?.userName}</p>
               <p className="text-sm text-slate-400">
                 {callStatus === "connected"
-                  ? "Connected"
+                  ? `Connected • ${durationLabel}`
                   : callStatus === "incoming"
                   ? incomingCall?.participants?.length > 2
                     ? `${incomingCall.from?.userName} invited you and ${

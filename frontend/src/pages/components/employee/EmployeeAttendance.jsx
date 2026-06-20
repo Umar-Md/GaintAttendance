@@ -8,6 +8,7 @@ import {
   TrendingUp,
   Camera,
   CalendarDays,
+  Clock,
   LogIn,
   LogOut,
   Loader2,
@@ -20,7 +21,9 @@ import {
   preset,
 } from "../../../mainApi";
 
-const EmployeeAttendance = () => {
+const EmployeeAttendance = ({
+  attendanceURI = `${employeeURI}/attendance`,
+}) => {
   const [attendance, setAttendance] = useState([]);
 
   const [selectedMonth, setSelectedMonth] = useState(
@@ -42,16 +45,14 @@ const EmployeeAttendance = () => {
     type: "",
     text: "",
   });
+  const [now, setNow] = useState(Date.now());
 
   /* FETCH ATTENDANCE */
   const fetchAttendance = async () => {
     try {
-      const res = await axios.get(
-        `${employeeURI}/attendance`,
-        {
-          withCredentials: true,
-        }
-      );
+      const res = await axios.get(attendanceURI, {
+        withCredentials: true,
+      });
 
       setAttendance(res.data.data || []);
     } catch (err) {
@@ -61,6 +62,14 @@ const EmployeeAttendance = () => {
 
   useEffect(() => {
     fetchAttendance();
+  }, [attendanceURI]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
   }, []);
 
   /* CAPTURE AND SEND */
@@ -151,6 +160,34 @@ const EmployeeAttendance = () => {
   const filteredAttendance = attendance.filter(
     (a) => a.date.startsWith(selectedMonth)
   );
+
+  const todayAttendance = attendance.find(
+    (a) => a.date === new Date().toISOString().split("T")[0]
+  );
+
+  const formatDuration = (milliseconds) => {
+    if (!milliseconds || milliseconds < 0) return "00:00:00";
+
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return [hours, minutes, seconds]
+      .map((value) => String(value).padStart(2, "0"))
+      .join(":");
+  };
+
+  const elapsedTime = (() => {
+    if (!todayAttendance?.startTime) return "00:00:00";
+
+    const start = new Date(todayAttendance.startTime).getTime();
+    const end = todayAttendance.endTime
+      ? new Date(todayAttendance.endTime).getTime()
+      : now;
+
+    return formatDuration(end - start);
+  })();
 
   /* STATS */
   const stats = {
@@ -259,6 +296,17 @@ const EmployeeAttendance = () => {
           <p className="text-slate-500 mt-2 text-sm sm:text-base">
             Biometric face-capture attendance system.
           </p>
+          <div className="mt-4 inline-flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3">
+            <Clock className="h-5 w-5 text-blue-600" />
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-wide text-blue-400">
+                Time Worked Today
+              </p>
+              <p className="font-mono text-2xl font-black text-blue-700">
+                {elapsedTime}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* RIGHT */}

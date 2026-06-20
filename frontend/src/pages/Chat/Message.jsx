@@ -10,15 +10,19 @@ import {
 } from "react-icons/fi";
 
 const Message = ({ msg, myId, onEdit, onDelete }) => {
-  const isMine = msg.sender === myId;
+  const getId = (value) => value?._id || value?.id || value?.toString?.() || value;
+  const isMine = getId(msg.sender) === getId(myId);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
   const hasFile = Boolean(msg.fileUrl);
   const fileType = msg.fileType || "document";
   const fileName = msg.fileName || "Open file";
   const sentAt = msg.createdAt || msg.updatedAt || null;
-  const timeLabel = sentAt
-    ? new Date(sentAt).toLocaleTimeString([], {
+  const dateTimeLabel = sentAt
+    ? new Date(sentAt).toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
         hour: "numeric",
         minute: "2-digit",
         hour12: true,
@@ -80,27 +84,31 @@ const Message = ({ msg, myId, onEdit, onDelete }) => {
   };
 
   return (
-    <div className={`flex ${isMine ? "justify-end" : "justify-start"} group relative mb-4`}>
-      <div className={`relative p-3 rounded-lg max-w-[80%] sm:max-w-xs shadow ${
+    <div className={`flex min-w-0 ${isMine ? "justify-end" : "justify-start"} group relative mb-4`}>
+      <div className={`relative min-w-0 w-fit max-w-[88%] sm:max-w-[78%] md:max-w-[70%] p-3 rounded-lg shadow ${
         isMine ? "bg-indigo-600 text-white" : "bg-white text-slate-800"
       }`}>
         {msg.isEdited && <span className="text-[9px] block mb-1 opacity-70 italic">(edited)</span>}
-        {msg.text && <p className="text-sm wrap-break-words">{msg.text}</p>}
+        {msg.text && (
+          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+            {msg.text}
+          </p>
+        )}
         {renderFile()}
-        {timeLabel && (
+        {dateTimeLabel && (
           <div className="mt-1 flex justify-end">
             <span
               className={`text-[10px] font-bold ${
                 isMine ? "text-white/80" : "text-slate-400"
               }`}
             >
-              {timeLabel}
+              {dateTimeLabel}
             </span>
           </div>
         )}
 
         {/* Triple Dot Menu - Now visible to both but Edit only for owner */}
-        <div className="absolute top-2 -left-6" ref={menuRef}>
+        <div className={`absolute top-2 ${isMine ? "-left-6" : "-right-6"}`} ref={menuRef}>
           <button 
             onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
             className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-slate-600 transition-all"
@@ -109,7 +117,7 @@ const Message = ({ msg, myId, onEdit, onDelete }) => {
           </button>
           
           {showMenu && (
-            <div className="absolute left-0 mt-1 w-24 bg-white shadow-xl rounded-md border border-slate-100 z-100 overflow-hidden">
+            <div className={`absolute mt-1 w-24 bg-white shadow-xl rounded-md border border-slate-100 z-100 overflow-hidden ${isMine ? "left-0" : "right-0"}`}>
               {isMine && msg.text && (
                 <button 
                   onClick={(e) => { e.stopPropagation(); onEdit(msg); setShowMenu(false); }}

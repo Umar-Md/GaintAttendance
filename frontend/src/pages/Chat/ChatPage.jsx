@@ -18,6 +18,7 @@ const ChatPage = ({
   keepSocketAlive = false,
   pendingIncomingCall = null,
   onPendingCallConsumed,
+  onStopNotificationSound,
 }) => {
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -66,6 +67,20 @@ const ChatPage = ({
 
   const callPartner = incomingCall?.from || selectedUser;
   const isCallVisible = callStatus !== "idle";
+  const handleAcceptCall = () => {
+    onStopNotificationSound?.();
+    acceptCall();
+  };
+
+  const handleRejectCall = () => {
+    onStopNotificationSound?.();
+    rejectCall();
+  };
+
+  const handleEndCall = () => {
+    onStopNotificationSound?.();
+    endCall();
+  };
 
   return (
     <div className="flex h-full w-full bg-white overflow-hidden relative">
@@ -164,9 +179,9 @@ const ChatPage = ({
         localStream={localStream}
         isMuted={isMuted}
         isCameraOff={isCameraOff}
-        acceptCall={acceptCall}
-        rejectCall={rejectCall}
-        endCall={endCall}
+        acceptCall={handleAcceptCall}
+        rejectCall={handleRejectCall}
+        endCall={handleEndCall}
         toggleMute={toggleMute}
         toggleCamera={toggleCamera}
       />

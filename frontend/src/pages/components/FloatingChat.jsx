@@ -20,6 +20,7 @@ const FloatingChat = ({ user }) => {
   const isOpenRef = useRef(false);
   const popupTimeoutRef = useRef(null);
   const audioContextRef = useRef(null);
+  const ringtoneIntervalRef = useRef(null);
   const resizeRef = useRef({
     active: false,
     startClientY: 0,
@@ -36,32 +37,87 @@ const FloatingChat = ({ user }) => {
     if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
       audioContextRef.current.resume();
     }
+    return audioContextRef.current;
   };
 
-  const playBeep = () => {
-    try {
-      if (!audioContextRef.current) {
-        initAudioContext();
-      }
-      if (!audioContextRef.current) return;
+  useEffect(() => {
+    const unlockAudio = () => {
+      const ctx = initAudioContext();
+      if (!ctx) return;
 
-      const ctx = audioContextRef.current;
-      const oscillator = ctx.createOscillator();
       const gain = ctx.createGain();
-
-      oscillator.type = "sine";
-      oscillator.frequency.value = 880;
+      const oscillator = ctx.createOscillator();
       gain.gain.setValueAtTime(0.001, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
-
       oscillator.connect(gain);
       gain.connect(ctx.destination);
       oscillator.start();
-      oscillator.stop(ctx.currentTime + 0.5);
+      oscillator.stop(ctx.currentTime + 0.01);
+    };
+
+    window.addEventListener("pointerdown", unlockAudio, { once: true });
+    window.addEventListener("keydown", unlockAudio, { once: true });
+    window.addEventListener("touchstart", unlockAudio, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
+      window.removeEventListener("touchstart", unlockAudio);
+    };
+  }, []);
+
+  const playTone = ({
+    frequency = 880,
+    duration = 0.35,
+    volume = 0.35,
+    delay = 0,
+    type = "sine",
+  } = {}) => {
+    try {
+      const ctx = initAudioContext();
+      if (!ctx) return;
+
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const startTime = ctx.currentTime + delay;
+      const endTime = startTime + duration;
+
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, startTime);
+      gain.gain.setValueAtTime(0.001, startTime);
+      gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.001, endTime);
+
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      oscillator.start(startTime);
+      oscillator.stop(endTime + 0.02);
     } catch (err) {
-      console.error("Call beep failed", err);
+      console.error("Notification sound failed", err);
     }
+  };
+
+  const playMessageTone = () => {
+    playTone({ frequency: 988, duration: 0.14, volume: 0.58, type: "triangle" });
+    playTone({ frequency: 1318, duration: 0.18, volume: 0.52, delay: 0.14, type: "triangle" });
+    playTone({ frequency: 1760, duration: 0.12, volume: 0.42, delay: 0.3, type: "sine" });
+  };
+
+  const playCallRingtone = () => {
+    playTone({ frequency: 659, duration: 0.18, volume: 0.58, type: "triangle" });
+    playTone({ frequency: 880, duration: 0.2, volume: 0.56, delay: 0.18, type: "triangle" });
+    playTone({ frequency: 1175, duration: 0.24, volume: 0.52, delay: 0.4, type: "sine" });
+    playTone({ frequency: 880, duration: 0.18, volume: 0.44, delay: 0.68, type: "triangle" });
+  };
+
+  const startCallRingtone = () => {
+    if (ringtoneIntervalRef.current) return;
+    playCallRingtone();
+    ringtoneIntervalRef.current = window.setInterval(playCallRingtone, 1700);
+  };
+
+  const stopCallRingtone = () => {
+    window.clearInterval(ringtoneIntervalRef.current);
+    ringtoneIntervalRef.current = null;
   };
 
   const showCallPopup = (call) => {
@@ -114,13 +170,16 @@ const FloatingChat = ({ user }) => {
       const receiverId = getId(msg.receiver);
       const senderId = getId(msg.sender);
 
-      if (receiverId === user._id && senderId !== user._id && !isOpenRef.current) {
-        setUnreadCount((count) => count + 1);
+      if (receiverId === user._id && senderId !== user._id) {
+        playMessageTone();
+        if (!isOpenRef.current) {
+          setUnreadCount((count) => count + 1);
+        }
       }
     };
 
     const handleIncomingCall = (call) => {
-      playBeep();
+      startCallRingtone();
       showCallPopup(call);
 
       if (!isOpenRef.current) {
@@ -129,6 +188,7 @@ const FloatingChat = ({ user }) => {
     };
 
     const clearPendingCall = () => {
+      stopCallRingtone();
       setPendingCall(null);
       setCallPopup(null);
       window.clearTimeout(popupTimeoutRef.current);
@@ -144,6 +204,7 @@ const FloatingChat = ({ user }) => {
       socket.off("call:offer", handleIncomingCall);
       socket.off("call:end", clearPendingCall);
       socket.off("call:reject", clearPendingCall);
+      stopCallRingtone();
       window.clearTimeout(popupTimeoutRef.current);
     };
   }, [user?._id]);
@@ -153,6 +214,8 @@ const FloatingChat = ({ user }) => {
     setUnreadCount(0);
     if (!isOpen) {
       initAudioContext();
+    } else {
+      stopCallRingtone();
     }
   };
 
@@ -186,12 +249,12 @@ const FloatingChat = ({ user }) => {
 
   return (
     /* Added pointer-events-none to the wrapper so it doesn't block background clicks */
-    <div className="fixed bottom-5 right-5 z-9999 flex flex-col items-end pointer-events-none">
+    <div className="fixed bottom-3 left-3 right-3 z-9999 flex flex-col items-stretch sm:bottom-5 sm:left-auto sm:right-5 sm:items-end pointer-events-none">
        
       {/* Chat Window Container */}
       {isOpen && (
         <div 
-          className="mb-4 w-87.5 sm:w-95 max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden pointer-events-auto animate-in slide-in-from-bottom-5 duration-300"
+          className="mb-4 w-full sm:w-95 max-h-[82vh] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden pointer-events-auto animate-in slide-in-from-bottom-5 duration-300"
           style={{ height: `${panelHeightPx}px` }}
         >
           {/* Resize handle (drag up/down to change height) */}
@@ -208,9 +271,9 @@ const FloatingChat = ({ user }) => {
           </div>
           {/* Header - Fixed Height, Removed Resize Button */}
          <div className="bg-indigo-600 px-4 py-3 text-white flex justify-between items-center shrink-0">
-   <div className="flex items-center gap-2">
-     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-    <span className="font-bold text-sm tracking-wide">
+  <div className="flex min-w-0 items-center gap-2">
+     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shrink-0"></div>
+    <span className="font-bold text-sm tracking-wide truncate">
   {user.userName || user.name || user.username || "User"} •{" "}
   {user.designation || user.role}
 </span>
@@ -239,7 +302,11 @@ const FloatingChat = ({ user }) => {
               user={user}
               keepSocketAlive
               pendingIncomingCall={pendingCall}
-              onPendingCallConsumed={() => setPendingCall(null)}
+              onPendingCallConsumed={() => {
+                stopCallRingtone();
+                setPendingCall(null);
+              }}
+              onStopNotificationSound={stopCallRingtone}
             />
           </div>
         </div>
@@ -268,7 +335,7 @@ const FloatingChat = ({ user }) => {
         </div>
       )}
 
-      <div className="relative flex items-center">
+      <div className="relative flex items-center justify-end">
         <button
           onClick={toggleChat}
           title="Team Chat"

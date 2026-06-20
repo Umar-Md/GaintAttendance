@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Menu,
   X,
+  UserCheck,
 } from "lucide-react";
 import Dashboard from "./components/hr/Dashboard";
 import HRProfile from "./components/hr/HrProfile";
@@ -25,6 +26,8 @@ import { hrURI, userURI } from "../mainApi";
 import { useNavigate } from "react-router-dom";
 import FloatingChat from "./components/FloatingChat";
 import HrCreateProject from "./components/hr/HrCreateProject";
+import EmployeeLoginDetails from "./components/hr/EmployeeLoginDetails";
+import EmployeeAttendance from "./components/employee/EmployeeAttendance";
 
 const HRDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -180,6 +183,10 @@ const HRDashboard = () => {
         return <HrCreateProject />;
       case "attendance":
         return <Attendance attendance={attendance} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />;
+      case "myAttendance":
+        return <EmployeeAttendance attendanceURI={`${hrURI}/my-attendance`} />;
+      case "employeeLogins":
+        return <EmployeeLoginDetails />;
       case "leaves":
         return <Leaves leaves={leaves} />;
       case "settings":
@@ -193,7 +200,9 @@ const HRDashboard = () => {
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "profile", label: "My Profile", icon: User },
     { id: "managers", label: "Manage Managers", icon: Users },
+    { id: "myAttendance", label: "My Attendance", icon: Clock },
     { id: "attendance", label: "Attendance", icon: Clock },
+    { id: "employeeLogins", label: "Employee Login Details", icon: UserCheck },
     { id: "leaves", label: "Leave Requests", icon: CalendarDays },
     { id: "settings", label: "Settings", icon: Settings },
   ];

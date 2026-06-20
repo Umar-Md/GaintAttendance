@@ -17,8 +17,31 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
   const [cameraStream, setCameraStream] = useState(null);
   const videoRef = useRef(null);
   const bottomRef = useRef(null);
+  const textareaRef = useRef(null);
 
   const getId = (value) => value?._id || value?.id || value?.toString?.() || value;
+  const getMessageDateKey = (message) => {
+    const value = message.createdAt || message.updatedAt;
+    return value ? new Date(value).toDateString() : "";
+  };
+  const formatDateDivider = (message) => {
+    const value = message.createdAt || message.updatedAt;
+    if (!value) return "";
+
+    const messageDate = new Date(value);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    if (messageDate.toDateString() === today.toDateString()) return "Today";
+    if (messageDate.toDateString() === yesterday.toDateString()) return "Yesterday";
+
+    return messageDate.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
   const appendMessageOnce = (message) => {
     if (!message?._id) return;
 
@@ -98,6 +121,12 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (!textareaRef.current) return;
+    textareaRef.current.style.height = "auto";
+    textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 112)}px`;
+  }, [text]);
 
   // --- ACTIONS ---
 
@@ -278,10 +307,25 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
       )}
 
       {/* MESSAGES */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-        {messages.map((msg) => (
-          <Message key={msg._id} msg={msg} myId={currentUser._id} onDelete={handleDelete} onEdit={handleStartEdit} />
-        ))}
+      <div className="flex-1 min-w-0 overflow-y-auto px-3 py-4 sm:px-4 space-y-3 custom-scrollbar">
+        {messages.map((msg, index) => {
+          const currentDateKey = getMessageDateKey(msg);
+          const previousDateKey = index > 0 ? getMessageDateKey(messages[index - 1]) : "";
+          const shouldShowDate = currentDateKey && currentDateKey !== previousDateKey;
+
+          return (
+            <React.Fragment key={msg._id}>
+              {shouldShowDate && (
+                <div className="flex justify-center py-1">
+                  <span className="rounded-full bg-slate-200/80 px-3 py-1 text-[11px] font-bold text-slate-600">
+                    {formatDateDivider(msg)}
+                  </span>
+                </div>
+              )}
+              <Message msg={msg} myId={currentUser._id} onDelete={handleDelete} onEdit={handleStartEdit} />
+            </React.Fragment>
+          );
+        })}
         <div ref={bottomRef} />
       </div>
 
@@ -303,18 +347,18 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
           </div>
         </div>
       ) : (
-        <div className="p-3 bg-white border-t shadow-lg">
+        <div className="p-2 sm:p-3 bg-white border-t shadow-lg">
           {editingMessage && (
             <div className="flex items-center justify-between bg-indigo-50 px-4 py-2 mb-2 rounded-lg text-xs text-indigo-600">
               <span>Editing message...</span>
               <button onClick={handleCancelEdit}><FiX /></button>
             </div>
           )}
-          <div className="flex items-center gap-2">
-            <button onClick={() => document.getElementById("fileInput").click()} disabled={isUploading} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full">
+          <div className="flex items-end gap-1.5 sm:gap-2">
+            <button onClick={() => document.getElementById("fileInput").click()} disabled={isUploading} className="shrink-0 p-2 text-slate-500 hover:bg-slate-100 rounded-full">
               <FiPaperclip size={20} className={isUploading ? "animate-spin" : ""} />
             </button>
-            <button onClick={startCamera} className="p-2 text-slate-500 hover:bg-slate-100 rounded-full"><FiCamera size={20} /></button>
+            <button onClick={startCamera} className="shrink-0 p-2 text-slate-500 hover:bg-slate-100 rounded-full"><FiCamera size={20} /></button>
             <input
               type="file"
               hidden
@@ -325,14 +369,21 @@ const ChatWindow = ({ selectedUser, currentUser }) => {
                 e.target.value = "";
               }}
             />
-            <input
+            <textarea
+              ref={textareaRef}
               value={text}
-              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+              rows={1}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
               onChange={(e) => setText(e.target.value)}
-              className="flex-1 bg-slate-100 rounded-2xl px-4 py-2 text-sm outline-none focus:bg-white transition-all"
+              className="min-h-10 max-h-28 flex-1 resize-none bg-slate-100 rounded-2xl px-4 py-2.5 text-sm leading-5 outline-none focus:bg-white transition-all break-words [overflow-wrap:anywhere]"
               placeholder={editingMessage ? "Edit your message..." : "Type a message..."}
             />
-            <button onClick={sendMessage} disabled={!text.trim()} className="p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:bg-slate-300">
+            <button onClick={sendMessage} disabled={!text.trim()} className="shrink-0 p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:bg-slate-300">
               <FiSend size={18} />
             </button>
           </div>

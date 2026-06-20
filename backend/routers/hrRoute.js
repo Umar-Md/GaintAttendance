@@ -5,8 +5,10 @@ import {
   approveLeave,
   deleteManager,
   getAllHolidays,
+  getEmployeeLoginDetailsForHR,
   getEmployees,
   getHrDetails,
+  getMyAttendanceForHR,
   getManagers,
   getManagersAttendanceForHR,
   getTeamLeaves,
@@ -26,6 +28,7 @@ const hrRoute = express.Router();
 hrRoute.get("/getprofile", verifyToken, onlyHr, getHrDetails);
 hrRoute.get("/getManagers", verifyToken, onlyHr, getManagers);
 hrRoute.get("/getEmployees", verifyToken, onlyHr, getEmployees);
+hrRoute.get("/my-attendance", verifyToken, onlyHr, getMyAttendanceForHR);
 hrRoute.patch("/activateManager/:id", verifyToken, onlyHr, activateManager);
 hrRoute.patch("/deleteManager/:id", verifyToken, onlyHr, deleteManager);
 hrRoute.delete("/manager/:id", verifyToken, onlyHr, permanentlyDeleteManager);
@@ -38,6 +41,12 @@ hrRoute.get(
   verifyToken,
   onlyHr,
   getManagersAttendanceForHR,
+);
+hrRoute.get(
+  "/employee-login-details",
+  verifyToken,
+  onlyHr,
+  getEmployeeLoginDetailsForHR,
 );
 
 hrRoute.get("/getTeamLeaves", verifyToken, onlyHr, getTeamLeaves);
