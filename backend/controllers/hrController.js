@@ -9,7 +9,7 @@ import Task from "../models/Task.js";
 const getHrDetails = async (req, res) => {
   const id = req.userId;
   try {
-    const Hr = await User.findById(id);
+    const Hr = await User.findById(id).select("-faceDescriptor");
     if (!Hr) return res.status(400).json({ message: "User not exist" });
     const { password, ...safeHr } = Hr._doc;
     return res

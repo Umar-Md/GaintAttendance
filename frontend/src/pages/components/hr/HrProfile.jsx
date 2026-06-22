@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { CLOUD_NAME, hrURI, preset, userURI } from "../../../mainApi";
+import FaceEnrollment from "../FaceEnrollment";
 
 const HRProfile = () => {
   const fileRef = useRef(null);
@@ -287,6 +288,11 @@ const HRProfile = () => {
                   </div>
                 </div>
               </div>
+
+              <FaceEnrollment
+                faceRegisteredAt={profile.faceRegisteredAt}
+                onRegistered={fetchProfile}
+              />
 
               {isEditing && (
                 <button

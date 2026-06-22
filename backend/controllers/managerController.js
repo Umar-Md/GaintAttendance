@@ -9,7 +9,7 @@ import mongoose from "mongoose";
 
 const getManagerProfile = async (req, res) => {
   try {
-    const manager = await User.findById(req.userId).select("-password");
+    const manager = await User.findById(req.userId).select("-password -faceDescriptor");
 
     if (!manager || manager.role !== "Manager") {
       return res.status(403).json({ message: "Access denied" });
@@ -26,7 +26,7 @@ const getMyEmployees = async (req, res) => {
     const employees = await User.find({
       role: "Employee",
       managerId: req.userId,
-    }).select("-password");
+    }).select("-password -faceDescriptor");
 
     res.json({ data: employees });
   } catch (err) {

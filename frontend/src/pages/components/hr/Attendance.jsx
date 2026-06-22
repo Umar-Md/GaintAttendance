@@ -228,6 +228,8 @@ const Attendance = ({
                       className={`inline-flex mt-1 px-2 py-1 rounded-full text-xs font-bold ${
                         record.status === "Present"
                           ? "bg-emerald-100 text-emerald-700"
+                          : record.status === "Half Day"
+                          ? "bg-amber-100 text-amber-700"
                           : "bg-rose-100 text-rose-700"
                       }`}
                     >
@@ -341,6 +343,8 @@ const Attendance = ({
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-black border transition-colors ${
                         record.status === "Present"
                           ? "bg-emerald-50 text-emerald-600 border-emerald-100 group-hover:bg-emerald-500 group-hover:text-white"
+                          : record.status === "Half Day"
+                          ? "bg-amber-50 text-amber-600 border-amber-100 group-hover:bg-amber-500 group-hover:text-white"
                           : "bg-rose-50 text-rose-600 border-rose-100 group-hover:bg-rose-500 group-hover:text-white"
                       }`}
                     >

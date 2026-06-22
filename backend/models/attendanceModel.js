@@ -23,12 +23,18 @@ const attendanceSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["Present", "Absent", "Holiday", "Incomplete"],
+      enum: ["Present", "Half Day", "Absent", "Holiday", "Incomplete"],
       default: "Incomplete",
     },
 
     startPhoto: String,
     endPhoto: String,
+    startFaceScore: Number,
+    endFaceScore: Number,
+    faceVerificationProvider: {
+      type: String,
+      default: "face-api.js",
+    },
   },
   { timestamps: true }
 );

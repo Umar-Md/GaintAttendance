@@ -78,9 +78,9 @@ const EmployeeDashboard = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: "Total Working Days", value: attendance.filter((a) => normalizeStatus(a.status) === "PRESENT").length, icon: TrendingUp, accent: "bg-red-500", iconBg: "bg-red-100", iconColor: "text-red-600" },
+          { label: "Half Days", value: attendance.filter((a) => normalizeStatus(a.status) === "HALF DAY").length, icon: Clock, accent: "bg-amber-400", iconBg: "bg-amber-100", iconColor: "text-amber-600" },
           { label: "Leaves Taken", value: (Array.isArray(leaves) ? leaves : []).filter((l) => normalizeStatus(l?.status) === "APPROVED").length, icon: Calendar, accent: "bg-blue-600", iconBg: "bg-blue-100", iconColor: "text-blue-600" },
           { label: "Pending Leaves", value: pendingLeavesCount, icon: Clock, accent: "bg-yellow-400", iconBg: "bg-yellow-100", iconColor: "text-yellow-600" },
-          { label: "Upcoming Holidays", value: (Array.isArray(holidays) ? holidays : []).filter((h) => new Date(h.date) > new Date()).length, icon: CheckCircle, accent: "bg-green-500", iconBg: "bg-green-100", iconColor: "text-green-600" }
         ].map((stat, i) => (
           <div key={i} className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden group">
             <div className={`absolute top-0 left-0 w-1.5 h-full ${stat.accent}`}></div>
@@ -162,7 +162,7 @@ const EmployeeDashboard = ({
                       <td className="px-8 py-4 font-bold text-slate-700">{record.date}</td>
                       <td className="px-8 py-4">
                         <span className={`px-3 py-1 rounded-lg text-[14px] font-black ${
-                            record.status === "Present" ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
+                            record.status === "Present" ? "bg-emerald-50 text-emerald-600" : record.status === "Half Day" ? "bg-amber-50 text-amber-600" : "bg-red-50 text-red-600"
                           }`}>
                           {record.status}
                         </span>

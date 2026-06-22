@@ -69,6 +69,12 @@ const userSchema = new mongoose.Schema(
     },
 
     imageUrl: String,
+    faceDescriptor: {
+      type: [Number],
+      default: undefined,
+    },
+    faceRegisteredAt: Date,
+    faceRecognitionVersion: String,
   },
   { timestamps: true }
 );

@@ -6,6 +6,7 @@ import Holiday from "../models/holidayModel.js";
 import Attendance from "../models/attendanceModel.js";
 import isPublicHoliday from "../utils/isPublicHoliday.js";
 import sendEmail from "../utils/sendEmail.js";
+import { isValidDescriptor, verifyFaceDescriptor } from "../utils/faceVerification.js";
 
 const register = async (req, res) => {
   try {
@@ -197,7 +198,7 @@ const login = async (req, res) => {
     });
  userExist.lastLoginAt = new Date();
     await userExist.save();
-    const { password: _, ...safeUser } = userExist._doc;
+    const { password: _, faceDescriptor, ...safeUser } = userExist._doc;
 
     return res.status(200).json({
       message: "Login successful",
@@ -243,10 +244,31 @@ const startAttendance = async (req, res) => {
   try {
     const userId = req.userId;
     const today = new Date().toISOString().split("T")[0];
-    const { imageUrl } = req.body;
+    const { imageUrl, faceDescriptor } = req.body;
 
     if (!imageUrl) {
       return res.status(400).json({ message: "Start photo required" });
+    }
+
+    if (!isValidDescriptor(faceDescriptor)) {
+      return res.status(400).json({ message: "Face verification data required" });
+    }
+
+    const user = await User.findById(userId).select("faceDescriptor");
+
+    if (!isValidDescriptor(user?.faceDescriptor)) {
+      return res.status(403).json({
+        message: "Please register your face in profile before marking attendance.",
+      });
+    }
+
+    const faceCheck = verifyFaceDescriptor(user.faceDescriptor, faceDescriptor);
+
+    if (!faceCheck.match) {
+      return res.status(403).json({
+        message: "Face verification failed. Please use your registered face.",
+        faceScore: faceCheck.distance,
+      });
     }
 
     // ❌ Public holiday check
@@ -269,6 +291,7 @@ const startAttendance = async (req, res) => {
       date: today,
       startTime: new Date(),
       startPhoto: imageUrl,
+      startFaceScore: faceCheck.distance,
       status: "Incomplete",
     });
 
@@ -283,15 +306,37 @@ const startAttendance = async (req, res) => {
 };
 
 const REQUIRED_HOURS = 8; // company policy: 8 hours count as a valid day
+const HALF_DAY_HOURS = 4; // company policy: 4 hours count as a half day
 
 const endAttendance = async (req, res) => {
   try {
     const userId = req.userId;
     const today = new Date().toISOString().split("T")[0];
-    const { imageUrl } = req.body;
+    const { imageUrl, faceDescriptor } = req.body;
 
     if (!imageUrl) {
       return res.status(400).json({ message: "End photo required" });
+    }
+
+    if (!isValidDescriptor(faceDescriptor)) {
+      return res.status(400).json({ message: "Face verification data required" });
+    }
+
+    const user = await User.findById(userId).select("faceDescriptor");
+
+    if (!isValidDescriptor(user?.faceDescriptor)) {
+      return res.status(403).json({
+        message: "Please register your face in profile before marking attendance.",
+      });
+    }
+
+    const faceCheck = verifyFaceDescriptor(user.faceDescriptor, faceDescriptor);
+
+    if (!faceCheck.match) {
+      return res.status(403).json({
+        message: "Face verification failed. Please use your registered face.",
+        faceScore: faceCheck.distance,
+      });
     }
 
     // 🔍 Find today's attendance
@@ -319,11 +364,14 @@ const endAttendance = async (req, res) => {
     // 📸 Always save checkout photo & time
     attendance.endTime = endTime;
     attendance.endPhoto = imageUrl;
+    attendance.endFaceScore = faceCheck.distance;
     attendance.totalHours = workedHours;
 
     // 🟡/🟢 Status decision
     if (workedHours >= REQUIRED_HOURS) {
       attendance.status = "Present";
+    } else if (workedHours >= HALF_DAY_HOURS) {
+      attendance.status = "Half Day";
     } else {
       attendance.status = "Incomplete";
     }
@@ -334,13 +382,49 @@ const endAttendance = async (req, res) => {
       message:
         workedHours >= REQUIRED_HOURS
           ? "Attendance completed successfully"
-          : `Attendance marked incomplete. Work ${(
+          : workedHours >= HALF_DAY_HOURS
+          ? `Attendance marked as half day. Work ${(
               REQUIRED_HOURS - workedHours
+            ).toFixed(2)} more hours for full attendance`
+          : `Attendance marked incomplete. Work ${(
+              HALF_DAY_HOURS - workedHours
             ).toFixed(2)} more hours`,
       data: attendance,
     });
   } catch (error) {
     console.error("End Attendance Error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+const updateFaceEnrollment = async (req, res) => {
+  try {
+    const { faceDescriptor } = req.body;
+
+    if (!isValidDescriptor(faceDescriptor)) {
+      return res.status(400).json({ message: "Valid face descriptor required" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.userId,
+      {
+        faceDescriptor,
+        faceRegisteredAt: new Date(),
+        faceRecognitionVersion: "face-api.js",
+      },
+      { new: true, runValidators: true }
+    ).select("-password -faceDescriptor");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "Face registered successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error("Face enrollment error:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -360,7 +444,7 @@ const updateProfileImage = async (req, res) => {
       userId,
       { imageUrl },
       { new: true, runValidators: true }
-    ).select("-password");
+    ).select("-password -faceDescriptor");
     console.log(updatedUser);
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
@@ -473,6 +557,7 @@ export {
   endAttendance,
   getPublicHolidays,
   updateProfileImage,
+  updateFaceEnrollment,
   forgotPassword,
   resetPassword,
   seedSuperAdmin

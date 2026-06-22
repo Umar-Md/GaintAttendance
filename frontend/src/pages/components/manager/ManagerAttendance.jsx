@@ -3,6 +3,7 @@ import Webcam from "react-webcam";
 import axios from "axios";
 import { Clock, CheckCircle, XCircle, Camera, Calendar, Play, Square, AlertCircle, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { managerURI, userURI, CLOUD_NAME, preset } from "../../../mainApi";
+import { getFaceDescriptorFromImage } from "../../../utils/faceRecognition";
 
 const ManagerAttendance = () => {
   const [attendance, setAttendance] = useState([]);
@@ -37,14 +38,23 @@ const ManagerAttendance = () => {
     }
 
     try {
+      const faceDescriptor = await getFaceDescriptorFromImage(imageSrc);
       const formData = new FormData();
       formData.append("file", imageSrc);
       formData.append("upload_preset", preset);
       const cloudRes = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, formData);
       const endpoint = attendanceType === "START" ? "/start" : "/end";
-      const res = await axios.post(`${userURI}${endpoint}`, { imageUrl: cloudRes.data.secure_url }, { withCredentials: true });
+      const res = await axios.post(
+        `${userURI}${endpoint}`,
+        { imageUrl: cloudRes.data.secure_url, faceDescriptor },
+        { withCredentials: true }
+      );
 
-      setMessage({ type: "success", text: res.data.message });
+      const savedStatus = res.data.data?.status;
+      setMessage({
+        type: savedStatus === "Incomplete" || savedStatus === "Half Day" ? "warning" : "success",
+        text: res.data.message,
+      });
       setShowCamera(false);
       fetchAttendance();
     } catch (err) {
@@ -77,8 +87,8 @@ const ManagerAttendance = () => {
       {/* Main Action Section */}
       <div className="w-full">
         {showCamera ? (
-          <div className="bg-white p-4 sm:p-8 rounded-4xl shadow-xl border border-slate-100 animate-in zoom-in duration-300">
-            <div className="flex justify-between items-center mb-6">
+          <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-3xl sm:rounded-4xl shadow-xl border border-slate-100 animate-in zoom-in duration-300">
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full animate-pulse ${attendanceType === 'START' ? 'bg-emerald-500' : 'bg-blue-500'}`} />
                 <h3 className="font-black text-slate-700   text-[10px]">
@@ -90,12 +100,26 @@ const ManagerAttendance = () => {
               </button>
             </div>
 
-            <div className="relative bg-slate-900 rounded-3xl overflow-hidden aspect-4/3 sm:aspect-video max-w-2xl mx-auto mb-8 shadow-2xl">
+            <div className="relative bg-slate-900 rounded-3xl overflow-hidden aspect-square sm:aspect-video max-w-2xl max-h-[62vh] mx-auto mb-4 sm:mb-6 shadow-2xl">
               <Webcam ref={webcamRef} screenshotFormat="image/jpeg" className="w-full h-full object-cover scale-x-[-1]" />
               <div className={`absolute inset-0 bg-white transition-opacity duration-150 ${shutter ? "opacity-100" : "opacity-0"}`} />
               <div className="absolute inset-0 border-15 sm:border-30 border-indigo-500/10 pointer-events-none rounded-3xl" />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-64 sm:h-64 border-2 border-dashed border-white/30 rounded-full pointer-events-none" />
             </div>
+
+            {message.text && (
+              <div
+                className={`w-full max-w-2xl mx-auto mb-4 rounded-2xl px-4 py-3 text-center text-xs sm:text-sm font-bold ${
+                  message.type === "error"
+                    ? "bg-rose-100 text-rose-700"
+                    : message.type === "warning"
+                    ? "bg-amber-100 text-amber-700"
+                    : "bg-emerald-100 text-emerald-700"
+                }`}
+              >
+                {message.text}
+              </div>
+            )}
 
             <button
               onClick={captureAndSend}
@@ -111,7 +135,7 @@ const ManagerAttendance = () => {
             <div className="text-center lg:text-left">
               <h3 className="text-xl sm:text-2xl font-black text-slate-800 mb-2">Punch Interface</h3>
               {message.text ? (
-                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold ${message.type === 'error' ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-500'}`}>
+                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold ${message.type === 'error' ? 'bg-rose-50 text-rose-500' : message.type === 'warning' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-500'}`}>
                   {message.type === 'error' ? <AlertCircle size={14} /> : <CheckCircle size={14} />}
                   {message.text}
                 </div>
@@ -122,13 +146,13 @@ const ManagerAttendance = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
               <button
-                onClick={() => { setAttendanceType("START"); setShowCamera(true); }}
+                onClick={() => { setMessage({ type: "", text: "" }); setAttendanceType("START"); setShowCamera(true); }}
                 className="group flex-1 lg:flex-none flex items-center justify-center gap-4 px-10 py-5 bg-emerald-500 text-white rounded-2xl font-black text-xm   shadow-xl shadow-emerald-500/20 hover:bg-emerald-600 hover:-translate-y-1 transition-all active:translate-y-0"
               >
                 <Play size={16} fill="currentColor" className="group-hover:scale-110 transition-transform"/> Clock In
               </button>
               <button
-                onClick={() => { setAttendanceType("END"); setShowCamera(true); }}
+                onClick={() => { setMessage({ type: "", text: "" }); setAttendanceType("END"); setShowCamera(true); }}
                 className="group flex-1 lg:flex-none flex items-center justify-center gap-4 px-10 py-5 bg-[#E5534A] text-white rounded-2xl font-black text-xm   shadow-xl shadow-slate-800/20 hover:bg-red-600 hover:-translate-y-1 transition-all active:translate-y-0"
               >
                 <Square size={14} fill="currentColor" className="group-hover:scale-110 transition-transform" /> Clock Out
@@ -162,7 +186,7 @@ const ManagerAttendance = () => {
                     </p>
                   </td>
                   <td className="px-8 py-5">
-                    <span className={`px-3 py-1.5 rounded-xl text-[12px] font-black  ${a.status === 'Present' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                    <span className={`px-3 py-1.5 rounded-xl text-[12px] font-black  ${a.status === 'Present' ? 'bg-emerald-100 text-emerald-700' : a.status === 'Half Day' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'}`}>
                       {a.status}
                     </span>
                   </td>
@@ -199,7 +223,7 @@ const ManagerAttendance = () => {
                   <p className="font-black text-slate-800 text-sm">{a.date}</p>
                   <p className="text-[10px] font-bold text-slate-400 ">{new Date(a.date).toLocaleDateString("en-US", { weekday: "long" })}</p>
                 </div>
-                <span className={`px-3 py-1 rounded-lg text-[9px] font-black  ${a.status === 'Present' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                <span className={`px-3 py-1 rounded-lg text-[9px] font-black  ${a.status === 'Present' ? 'bg-emerald-100 text-emerald-700' : a.status === 'Half Day' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'}`}>
                   {a.status}
                 </span>
               </div>

@@ -20,6 +20,7 @@ import {
   CLOUD_NAME,
   preset,
 } from "../../../mainApi";
+import { getFaceDescriptorFromImage } from "../../../utils/faceRecognition";
 
 const EmployeeAttendance = ({
   attendanceURI = `${employeeURI}/attendance`,
@@ -100,6 +101,7 @@ const EmployeeAttendance = ({
     }
 
     try {
+      const faceDescriptor = await getFaceDescriptorFromImage(imageSrc);
       const formData = new FormData();
 
       formData.append("file", imageSrc);
@@ -121,13 +123,16 @@ const EmployeeAttendance = ({
         {
           imageUrl:
             cloudinaryRes.data.secure_url,
+          faceDescriptor,
         },
         {
           withCredentials: true,
         }
       );
 
-      if (res.data.status === "INCOMPLETE") {
+      const savedStatus = res.data.data?.status;
+
+      if (savedStatus === "Incomplete" || savedStatus === "Half Day") {
         setMessage({
           type: "warning",
           text: res.data.message,
@@ -195,6 +200,10 @@ const EmployeeAttendance = ({
       (a) => a.status === "Present"
     ).length,
 
+    halfDay: filteredAttendance.filter(
+      (a) => a.status === "Half Day"
+    ).length,
+
     absent: filteredAttendance.filter(
       (a) => a.status === "Absent"
     ).length,
@@ -210,9 +219,9 @@ const EmployeeAttendance = ({
 
       {/* CAMERA MODAL */}
       {showCamera && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
           
-          <div className="bg-white w-full max-w-md sm:max-w-xl rounded-4xl sm:rounded-[2.5rem] p-4 sm:p-6 shadow-2xl">
+          <div className="bg-white w-full max-w-md sm:max-w-xl max-h-[calc(100vh-1.5rem)] overflow-y-auto rounded-3xl sm:rounded-[2.5rem] p-4 sm:p-6 shadow-2xl">
 
             {/* HEADER */}
             <div className="flex items-start justify-between gap-4 mb-5">
@@ -240,7 +249,7 @@ const EmployeeAttendance = ({
             </div>
 
             {/* CAMERA */}
-            <div className="relative w-full aspect-square rounded-4xl overflow-hidden bg-black mb-5">
+            <div className="relative w-full aspect-square max-h-[58vh] rounded-3xl overflow-hidden bg-black mb-4">
               
               <Webcam
                 ref={webcamRef}
@@ -264,6 +273,20 @@ const EmployeeAttendance = ({
                 {new Date().toLocaleTimeString()}
               </div>
             </div>
+
+            {message.text && (
+              <div
+                className={`mb-4 rounded-2xl px-4 py-3 text-center text-xs sm:text-sm font-bold ${
+                  message.type === "success"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : message.type === "warning"
+                    ? "bg-amber-100 text-amber-700"
+                    : "bg-rose-100 text-rose-700"
+                }`}
+              >
+                {message.text}
+              </div>
+            )}
 
             {/* BUTTON */}
             <button
@@ -314,6 +337,7 @@ const EmployeeAttendance = ({
           
           <button
             onClick={() => {
+              setMessage({ type: "", text: "" });
               setAttendanceType("START");
               setShowCamera(true);
             }}
@@ -325,6 +349,7 @@ const EmployeeAttendance = ({
 
           <button
             onClick={() => {
+              setMessage({ type: "", text: "" });
               setAttendanceType("END");
               setShowCamera(true);
             }}
@@ -342,6 +367,8 @@ const EmployeeAttendance = ({
           className={`p-4 rounded-2xl text-center font-bold text-sm sm:text-base ${
             message.type === "success"
               ? "bg-emerald-100 text-emerald-700"
+              : message.type === "warning"
+              ? "bg-amber-100 text-amber-700"
               : "bg-rose-100 text-rose-700"
           }`}
         >
@@ -350,7 +377,7 @@ const EmployeeAttendance = ({
       )}
 
       {/* STATS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
         
         {[
           {
@@ -367,6 +394,14 @@ const EmployeeAttendance = ({
             icon: XCircle,
             color:
               "bg-rose-50 text-rose-600",
+          },
+
+          {
+            label: "Half Days",
+            value: stats.halfDay,
+            icon: Clock,
+            color:
+              "bg-amber-50 text-amber-600",
           },
 
           {

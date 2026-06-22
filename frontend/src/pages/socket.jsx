@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
+import { socketURI } from "../mainApi";
 
-const socket = io("https://attendance.gaintclout.com", {
+const socket = io(socketURI, {
   path: "/socket.io/",
   transports: ["websocket"],
   upgrade: false,

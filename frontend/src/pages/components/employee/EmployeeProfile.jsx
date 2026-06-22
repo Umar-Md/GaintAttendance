@@ -16,6 +16,7 @@ import {
   preset,
   userURI,
 } from "../../../mainApi";
+import FaceEnrollment from "../FaceEnrollment";
 
 const EmployeeProfile = () => {
   const fileRef = useRef(null);
@@ -305,6 +306,13 @@ const EmployeeProfile = () => {
                   "No narrative provided. Update your profile to include your expertise."}
               </div>
             )}
+          </div>
+
+          <div className="mt-8">
+            <FaceEnrollment
+              faceRegisteredAt={profile.faceRegisteredAt}
+              onRegistered={fetchProfile}
+            />
           </div>
         </div>
       </div>

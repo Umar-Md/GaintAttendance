@@ -10,6 +10,7 @@ import {
   seedHr,
   seedSuperAdmin,
   startAttendance,
+  updateFaceEnrollment,
   updateProfileImage,
 } from "../controllers/userController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
@@ -24,6 +25,7 @@ userRoute.get("/getPublicHolidays", verifyToken, getPublicHolidays);
 userRoute.post("/start", verifyToken, startAttendance);
 userRoute.post("/end", verifyToken, endAttendance);
 userRoute.patch("/update-image", verifyToken, updateProfileImage);
+userRoute.patch("/face-enrollment", verifyToken, updateFaceEnrollment);
 userRoute.post("/forgotPassword", forgotPassword);
 userRoute.post("/resetPassword", resetPassword);
 userRoute.get("/seedSuperAdmin", seedSuperAdmin);

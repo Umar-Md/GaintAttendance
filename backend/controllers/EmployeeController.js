@@ -5,7 +5,7 @@ import User from "../models/userModel.js";
 
 const getEmployeeProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select("-password");
+    const user = await User.findById(req.userId).select("-password -faceDescriptor");
 
     if (!user || user.role !== "Employee") {
       return res.status(403).json({ message: "Access denied" });
@@ -32,7 +32,7 @@ const getTeammates = async (req, res) => {
     const teammates = await User.find({
       _id: { $ne: req.userId }, // $ne means "Not Equal"
       role: "Employee"
-    }).select("-password");
+    }).select("-password -faceDescriptor");
 
     res.json({ data: teammates });
   } catch (err) {

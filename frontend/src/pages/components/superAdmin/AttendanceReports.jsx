@@ -53,6 +53,7 @@ const AttendanceReports = () => {
     const records = visibleAttendance;
     const completed = records.filter((record) => record.endTime).length;
     const present = records.filter((record) => record.status === "Present").length;
+    const halfDay = records.filter((record) => record.status === "Half Day").length;
     const totalHours = records.reduce(
       (sum, record) => sum + Number(record.totalHours || 0),
       0
@@ -62,6 +63,7 @@ const AttendanceReports = () => {
       total: records.length,
       completed,
       present,
+      halfDay,
       totalHours: totalHours.toFixed(1),
     };
   }, [visibleAttendance]);
@@ -209,9 +211,10 @@ const AttendanceReports = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Metric title="Records" value={summary.total} icon={FileText} />
         <Metric title="Present Days" value={summary.present} icon={UserCheck} />
+        <Metric title="Half Days" value={summary.halfDay} icon={Clock} />
         <Metric title="Clocked Out" value={summary.completed} icon={Clock} />
         <Metric title="Total Hours" value={summary.totalHours} icon={Clock} />
       </div>
@@ -282,6 +285,8 @@ const AttendanceReports = () => {
                           className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
                             record.status === "Present"
                               ? "bg-emerald-50 text-emerald-700"
+                              : record.status === "Half Day"
+                              ? "bg-amber-50 text-amber-700"
                               : "bg-amber-50 text-amber-700"
                           }`}
                         >

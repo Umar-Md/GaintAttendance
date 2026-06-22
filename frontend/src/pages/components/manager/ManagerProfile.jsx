@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { CLOUD_NAME, managerURI, preset, userURI } from "../../../mainApi";
+import FaceEnrollment from "../FaceEnrollment";
 
 const ManagerProfile = () => {
   const fileRef = useRef(null);
@@ -256,6 +257,13 @@ const ManagerProfile = () => {
                 {profile.bio || "No bio added yet. Click edit to add your professional summary."}
               </p>
             )}
+          </div>
+
+          <div className="mt-8 sm:mt-10">
+            <FaceEnrollment
+              faceRegisteredAt={profile.faceRegisteredAt}
+              onRegistered={fetchProfile}
+            />
           </div>
 
           {isEditing && (
