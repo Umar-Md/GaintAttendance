@@ -9,11 +9,12 @@ import {
   UserCheck,
 } from "lucide-react";
 import { hrURI } from "../../../mainApi";
+import { getLocalDateString } from "../../../utils/localDate";
 
 const EmployeeLoginDetails = () => {
   const [records, setRecords] = useState([]);
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
+    getLocalDateString()
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);

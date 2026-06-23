@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import Webcam from "react-webcam";
 import axios from "axios";
 
@@ -21,6 +21,10 @@ import {
   preset,
 } from "../../../mainApi";
 import { getFaceDescriptorFromImage } from "../../../utils/faceRecognition";
+import { getLocalDateString, getLocalMonthString } from "../../../utils/localDate";
+
+const wait = (milliseconds) =>
+  new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
 const EmployeeAttendance = ({
   attendanceURI = `${employeeURI}/attendance`,
@@ -28,7 +32,7 @@ const EmployeeAttendance = ({
   const [attendance, setAttendance] = useState([]);
 
   const [selectedMonth, setSelectedMonth] = useState(
-    new Date().toISOString().slice(0, 7)
+    getLocalMonthString()
   );
 
   const webcamRef = useRef(null);
@@ -49,7 +53,7 @@ const EmployeeAttendance = ({
   const [now, setNow] = useState(Date.now());
 
   /* FETCH ATTENDANCE */
-  const fetchAttendance = async () => {
+  const fetchAttendance = useCallback(async () => {
     try {
       const res = await axios.get(attendanceURI, {
         withCredentials: true,
@@ -59,11 +63,11 @@ const EmployeeAttendance = ({
     } catch (err) {
       console.error("Failed to fetch attendance", err);
     }
-  };
+  }, [attendanceURI]);
 
   useEffect(() => {
     fetchAttendance();
-  }, [attendanceURI]);
+  }, [fetchAttendance]);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -86,22 +90,22 @@ const EmployeeAttendance = ({
       text: "",
     });
 
-    const imageSrc =
-      webcamRef.current?.getScreenshot();
-
-    if (!imageSrc) {
-      setMessage({
-        type: "error",
-        text: "Camera capture failed",
-      });
-
-      setLoading(false);
-
-      return;
-    }
-
     try {
-      const faceDescriptor = await getFaceDescriptorFromImage(imageSrc);
+      const faceDescriptors = [];
+      let imageSrc = null;
+
+      for (let sample = 0; sample < 3; sample += 1) {
+        if (sample > 0) await wait(250);
+
+        const sampleImage = webcamRef.current?.getScreenshot();
+        if (!sampleImage) {
+          throw new Error("Camera capture failed");
+        }
+
+        if (!imageSrc) imageSrc = sampleImage;
+        faceDescriptors.push(await getFaceDescriptorFromImage(sampleImage));
+      }
+
       const formData = new FormData();
 
       formData.append("file", imageSrc);
@@ -123,7 +127,8 @@ const EmployeeAttendance = ({
         {
           imageUrl:
             cloudinaryRes.data.secure_url,
-          faceDescriptor,
+          faceDescriptor: faceDescriptors[0],
+          faceDescriptors,
         },
         {
           withCredentials: true,
@@ -167,7 +172,7 @@ const EmployeeAttendance = ({
   );
 
   const todayAttendance = attendance.find(
-    (a) => a.date === new Date().toISOString().split("T")[0]
+    (a) => a.date === getLocalDateString()
   );
 
   const formatDuration = (milliseconds) => {

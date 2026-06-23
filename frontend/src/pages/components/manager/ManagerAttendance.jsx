@@ -5,6 +5,9 @@ import { Clock, CheckCircle, XCircle, Camera, Calendar, Play, Square, AlertCircl
 import { managerURI, userURI, CLOUD_NAME, preset } from "../../../mainApi";
 import { getFaceDescriptorFromImage } from "../../../utils/faceRecognition";
 
+const wait = (milliseconds) =>
+  new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+
 const ManagerAttendance = () => {
   const [attendance, setAttendance] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
@@ -30,15 +33,22 @@ const ManagerAttendance = () => {
     setLoading(true);
     setMessage({ type: "", text: "" });
 
-    const imageSrc = webcamRef.current?.getScreenshot();
-    if (!imageSrc) {
-      setMessage({ type: "error", text: "Camera capture failed" });
-      setLoading(false);
-      return;
-    }
-
     try {
-      const faceDescriptor = await getFaceDescriptorFromImage(imageSrc);
+      const faceDescriptors = [];
+      let imageSrc = null;
+
+      for (let sample = 0; sample < 3; sample += 1) {
+        if (sample > 0) await wait(250);
+
+        const sampleImage = webcamRef.current?.getScreenshot();
+        if (!sampleImage) {
+          throw new Error("Camera capture failed");
+        }
+
+        if (!imageSrc) imageSrc = sampleImage;
+        faceDescriptors.push(await getFaceDescriptorFromImage(sampleImage));
+      }
+
       const formData = new FormData();
       formData.append("file", imageSrc);
       formData.append("upload_preset", preset);
@@ -46,7 +56,11 @@ const ManagerAttendance = () => {
       const endpoint = attendanceType === "START" ? "/start" : "/end";
       const res = await axios.post(
         `${userURI}${endpoint}`,
-        { imageUrl: cloudRes.data.secure_url, faceDescriptor },
+        {
+          imageUrl: cloudRes.data.secure_url,
+          faceDescriptor: faceDescriptors[0],
+          faceDescriptors,
+        },
         { withCredentials: true }
       );
 

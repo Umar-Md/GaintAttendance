@@ -38,10 +38,18 @@ const getManagers = async (req, res) => {
 
 const getEmployees = async (req, res) => {
   try {
-    // const list = await User.find({ role: "Employee" }, "-password");
-     const list = await User.find(
-      { _id: req.userId, role: "Employee" },
-      "-password",
+    const managers = await User.find({
+      hrId: req.userId,
+      role: "Manager",
+    }).select("_id");
+
+    const managerIds = managers.map((manager) => manager._id);
+    const list = await User.find(
+      {
+        role: "Employee",
+        $or: [{ hrId: req.userId }, { managerId: { $in: managerIds } }],
+      },
+      "-password -faceDescriptor",
     );
     return res
       .status(200)
@@ -302,14 +310,10 @@ const getEmployeeLoginDetailsForHR = async (req, res) => {
       hrId: req.userId,
     }).select("_id");
 
-    if (!managers.length) {
-      return res.status(200).json({ success: true, count: 0, data: [] });
-    }
-
     const managerIds = managers.map((manager) => manager._id);
     const employeeQuery = {
       role: "Employee",
-      managerId: { $in: managerIds },
+      $or: [{ hrId: req.userId }, { managerId: { $in: managerIds } }],
     };
 
     if (employeeId) {

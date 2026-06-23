@@ -48,14 +48,14 @@ const HRProfile = () => {
   }, []); // Note: In a real app, you might want to remove 'profile' from dependencies to prevent loops, but kept as per your logic.
 
   useEffect(() => {
-    if (!profile) return; {
-      setFormData({
-        userName: profile.userName || "",
-        phoneNumber: profile.phoneNumber || "",
-        department: profile.department || "Human Resources",
-        bio: profile.bio || "",
-      });
-    }
+    if (!profile) return;
+
+    setFormData({
+      userName: profile.userName || "",
+      phoneNumber: profile.phoneNumber || "",
+      department: profile.department || "Human Resources",
+      bio: profile.bio || "",
+    });
   }, [profile]);
 
   // ---------------- SAVE PROFILE (LOGIC UNCHANGED) ----------------
@@ -112,30 +112,35 @@ const HRProfile = () => {
   );
 
   return (
-    <div className="max-w-5xl mx-auto p-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-indigo-100 border border-slate-100 overflow-hidden">
+    <div className="mx-auto w-full max-w-6xl p-3 sm:p-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-2xl shadow-indigo-100">
         
         {/* HEADER SECTION - Premium Gradient Mesh */}
-        <div className="relative bg-[#618DF4] px-8 py-12 overflow-hidden">
+        <div className="relative overflow-hidden bg-[#618DF4] px-5 py-8 sm:px-8 sm:py-10">
           {/* Decorative background blobs */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-5  00 rounded-full blur-[100px] opacity-20 -mr-20 -mt-20"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500 rounded-full blur-[100px] opacity-20 -ml-20 -mb-20"></div>
+          <div className="absolute right-0 top-0 h-64 w-64 -mr-20 -mt-20 rounded-full bg-indigo-500 opacity-20 blur-[100px]"></div>
+          <div className="absolute bottom-0 left-0 h-64 w-64 -mb-20 -ml-20 rounded-full bg-purple-500 opacity-20 blur-[100px]"></div>
           
-          <div className="relative flex flex-col md:flex-row items-center gap-8">
+          <div className="relative flex flex-col items-center gap-6 md:flex-row md:items-center md:gap-8">
             {/* Avatar Container */}
-            <div className="relative group">
-              <div className="w-40 h-40 rounded-[2.5rem] border-4 border-white/20 p-1 backdrop-blur-sm transition-transform duration-500 group-hover:scale-105">
+            <div className="group relative shrink-0">
+              <div className="h-32 w-32 rounded-3xl border-4 border-white/20 p-1 backdrop-blur-sm transition-transform duration-500 group-hover:scale-105 sm:h-40 sm:w-40">
                 <img
-                  src={profile.imageUrl}
+                  src={
+                    profile.imageUrl ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      profile.userName || "HR"
+                    )}`
+                  }
                   alt="profile"
-                  className="w-full h-full rounded-[2.2rem] border-2 border-white object-cover shadow-2xl"
+                  className="h-full w-full rounded-[1.4rem] border-2 border-white object-cover shadow-2xl sm:rounded-[1.7rem]"
                 />
               </div>
 
               <button
                 onClick={() => fileRef.current.click()}
                 disabled={loadingImage}
-                className="absolute -bottom-2 -right-2 bg-white p-3 rounded-2xl shadow-xl text-indigo-600 hover:bg-indigo-50 transition-all hover:scale-110 active:scale-95 disabled:opacity-50"
+                className="absolute -bottom-2 -right-2 rounded-2xl bg-white p-3 text-indigo-600 shadow-xl transition-all hover:scale-110 hover:bg-indigo-50 active:scale-95 disabled:opacity-50"
               >
                 {loadingImage ? (
                   <div className="w-5 h-5 animate-spin border-2 border-indigo-600 border-t-transparent rounded-full" />
@@ -154,21 +159,21 @@ const HRProfile = () => {
             </div>
 
             {/* Quick Stats/Info */}
-            <div className="text-center md:text-left text-white space-y-2">
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                <h2 className="text-4xl font-black">{profile.userName}</h2>
-                <span className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[14px] font-black flex items-center gap-1 border border-white/20">
+            <div className="min-w-0 flex-1 space-y-2 text-center text-white md:text-left">
+              <div className="flex flex-wrap items-center justify-center gap-3 md:justify-start">
+                <h2 className="max-w-full wrap-break-word text-3xl font-black sm:text-4xl">{profile.userName}</h2>
+                <span className="flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[12px] font-black backdrop-blur-md sm:text-[14px]">
                   <BadgeCheck size={12} className="text-blue-400" /> Verified Admin
                 </span>
               </div>
-              <p className="text-indigo-200 font-medium text-lg flex items-center justify-center md:justify-start gap-2">
+              <p className="flex items-center justify-center gap-2 text-base font-medium text-indigo-100 md:justify-start sm:text-lg">
                 <Building size={18} /> {profile.department || "Human Resources"}
               </p>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-4 text-indigo-100/70 text-sm">
-                <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-4 text-sm text-indigo-100/80 md:justify-start">
+                <span className="flex min-w-0 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5">
                   <Mail size={14} /> {profile.email}
                 </span>
-                <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
+                <span className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5">
                   <IdCard size={14} /> ID: {profile._id.slice(-8).toUpperCase()}
                 </span>
               </div>
@@ -177,8 +182,8 @@ const HRProfile = () => {
         </div>
 
         {/* CONTENT BODY */}
-        <div className="p-10 lg:p-14">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
+        <div className="p-5 sm:p-8 lg:p-10">
+          <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
               <h3 className="text-2xl font-black text-slate-900 ">Detailed Profile</h3>
               <p className="text-slate-400 text-xs font-bold  mt-1">Manage your administrative identity</p>
@@ -197,10 +202,10 @@ const HRProfile = () => {
             </button>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-12">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
             {/* Left Column - Form */}
-            <div className="lg:col-span-2 space-y-8">
-              <div className="grid md:grid-cols-2 gap-8">
+            <div className="min-w-0 space-y-8">
+              <div className="grid gap-6 md:grid-cols-2">
                 <Field
                   icon={<User className="text-[#618DF4]" size={18} />}
                   label="Display Name"
@@ -258,8 +263,8 @@ const HRProfile = () => {
             </div>
 
             {/* Right Column - Status Cards */}
-            <div className="space-y-6">
-              <div className="bg-indigo-50/50 p-6 rounded-2 border border-indigo-100">
+            <div className="min-w-0 space-y-5">
+              <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5 sm:p-6">
                 <h4 className="text-[10px] font-black  text-indigo-400 mb-4">Account Status</h4>
                 <div className="flex items-center gap-4">
                   <div className={`p-3 rounded-2xl ${profile.isActive ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
@@ -274,7 +279,7 @@ const HRProfile = () => {
                 </div>
               </div>
 
-              <div className="bg-slate-900 p-6 rounded-2 text-white">
+              <div className="rounded-2xl bg-slate-900 p-5 text-white sm:p-6">
                 <h4 className="text-[10px] font-black text-slate-500 mb-4">Organizational Role</h4>
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-2xl bg-white/10 text-white">

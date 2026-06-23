@@ -6,7 +6,12 @@ import Holiday from "../models/holidayModel.js";
 import Attendance from "../models/attendanceModel.js";
 import isPublicHoliday from "../utils/isPublicHoliday.js";
 import sendEmail from "../utils/sendEmail.js";
-import { isValidDescriptor, verifyFaceDescriptor } from "../utils/faceVerification.js";
+import {
+  isValidDescriptor,
+  normalizeLiveDescriptors,
+  verifyLiveFaceDescriptors,
+} from "../utils/faceVerification.js";
+import { getLocalDateString } from "../utils/localDate.js";
 
 const register = async (req, res) => {
   try {
@@ -243,14 +248,16 @@ const getPublicHolidays = async (req, res) => {
 const startAttendance = async (req, res) => {
   try {
     const userId = req.userId;
-    const today = new Date().toISOString().split("T")[0];
-    const { imageUrl, faceDescriptor } = req.body;
+    const today = getLocalDateString();
+    const { imageUrl, faceDescriptor, faceDescriptors } = req.body;
 
     if (!imageUrl) {
       return res.status(400).json({ message: "Start photo required" });
     }
 
-    if (!isValidDescriptor(faceDescriptor)) {
+    const liveDescriptors = normalizeLiveDescriptors({ faceDescriptor, faceDescriptors });
+
+    if (!liveDescriptors.length || !liveDescriptors.every(isValidDescriptor)) {
       return res.status(400).json({ message: "Face verification data required" });
     }
 
@@ -262,12 +269,13 @@ const startAttendance = async (req, res) => {
       });
     }
 
-    const faceCheck = verifyFaceDescriptor(user.faceDescriptor, faceDescriptor);
+    const faceCheck = verifyLiveFaceDescriptors(user.faceDescriptor, liveDescriptors);
 
     if (!faceCheck.match) {
       return res.status(403).json({
-        message: "Face verification failed. Please use your registered face.",
+        message: faceCheck.message || "Face verification failed. Please use your registered face.",
         faceScore: faceCheck.distance,
+        threshold: faceCheck.threshold,
       });
     }
 
@@ -311,14 +319,16 @@ const HALF_DAY_HOURS = 4; // company policy: 4 hours count as a half day
 const endAttendance = async (req, res) => {
   try {
     const userId = req.userId;
-    const today = new Date().toISOString().split("T")[0];
-    const { imageUrl, faceDescriptor } = req.body;
+    const today = getLocalDateString();
+    const { imageUrl, faceDescriptor, faceDescriptors } = req.body;
 
     if (!imageUrl) {
       return res.status(400).json({ message: "End photo required" });
     }
 
-    if (!isValidDescriptor(faceDescriptor)) {
+    const liveDescriptors = normalizeLiveDescriptors({ faceDescriptor, faceDescriptors });
+
+    if (!liveDescriptors.length || !liveDescriptors.every(isValidDescriptor)) {
       return res.status(400).json({ message: "Face verification data required" });
     }
 
@@ -330,12 +340,13 @@ const endAttendance = async (req, res) => {
       });
     }
 
-    const faceCheck = verifyFaceDescriptor(user.faceDescriptor, faceDescriptor);
+    const faceCheck = verifyLiveFaceDescriptors(user.faceDescriptor, liveDescriptors);
 
     if (!faceCheck.match) {
       return res.status(403).json({
-        message: "Face verification failed. Please use your registered face.",
+        message: faceCheck.message || "Face verification failed. Please use your registered face.",
         faceScore: faceCheck.distance,
+        threshold: faceCheck.threshold,
       });
     }
 

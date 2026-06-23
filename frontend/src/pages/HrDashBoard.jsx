@@ -28,6 +28,7 @@ import FloatingChat from "./components/FloatingChat";
 import HrCreateProject from "./components/hr/HrCreateProject";
 import EmployeeLoginDetails from "./components/hr/EmployeeLoginDetails";
 import EmployeeAttendance from "./components/employee/EmployeeAttendance";
+import { getLocalDateString } from "../utils/localDate";
 
 const HRDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -41,7 +42,7 @@ const HRDashboard = () => {
   const navigate = useNavigate();
 
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
+    getLocalDateString()
   );
 
   const formatTime = useCallback((dateString) => {
